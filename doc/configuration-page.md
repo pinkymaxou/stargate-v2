@@ -1,24 +1,15 @@
 # Configuration Page
 
-> **⚠️ IMPLEMENTATION STATUS: PARTIALLY IMPLEMENTED (VIEW-ONLY)**
+> **IMPLEMENTATION STATUS: PARTIALLY IMPLEMENTED**
 >
-> **Current implementation** (`/setup/settings.html`):
+> **Current implementation** (Settings tab in `/setup/index.html`):
 > - ✅ View settings as table (key, description, type, min, default, max, value)
 > - ✅ Fetch settings from `/api/settingsjson`
-> - ❌ Edit functionality NOT implemented
-> - ❌ Import functionality NOT implemented
-> - ❌ Export functionality NOT implemented (can use API directly)
+> - ✅ Inline editing of values via input fields
+> - ✅ Save button (posts changes back to `/api/settingsjson`)
+> - ❌ JSON file import/export via UI not implemented
 >
-> **What works**:
-> - Display all settings in read-only table format
-> - Shows setting metadata (type, range, default)
->
-> **What doesn't work**:
-> - Inline editing of values
-> - JSON file import/export via UI
-> - Apply/save button
->
-> Users can use the API endpoint `/api/settingsjson` directly for export.
+> Users can use the API endpoint `/api/settingsjson` directly for full JSON export.
 
 ## Intended Functionality
 

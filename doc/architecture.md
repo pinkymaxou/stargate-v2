@@ -7,7 +7,7 @@ The Stargate Mainboard ESP32 project is a multi-firmware embedded system that co
 ## Firmware Components
 
 ### 1. stargate-fw (Main Controller)
-**Target**: ESP32-S3 mainboard
+**Target**: ESP32 (pinky-board) or ESP32-S3 (pablo-board)
 **Purpose**: Primary gate controller and web interface host
 
 **Key Responsibilities**:
@@ -50,7 +50,7 @@ The Stargate Mainboard ESP32 project is a multi-firmware embedded system that co
 
 ### 4. Board Variants (HAL Implementations)
 
-#### pinky-board (Production Implementation)
+#### pinky-board (ESP32 - Production Implementation)
 **Files**:
 - `firmware/stargate-fw/pinky-board/main/PinkySGHW.hpp`
 - `firmware/stargate-fw/pinky-board/main/PinkySGHW.cpp`
@@ -463,9 +463,9 @@ if (xSemaphoreTake(m_fanGate_mutex, portMAX_DELAY) == pdTRUE) {
 
 ---
 
-## ESP-IDF 5.3 Compatibility
+## ESP-IDF v6.1-dev Compatibility
 
-The project has been migrated to ESP-IDF 5.3 with the following changes:
+The project targets ESP-IDF v6.1-dev. Key configuration details:
 
 ### MCPWM Driver Migration
 **Old API** (ESP-IDF 4.x):
@@ -639,12 +639,7 @@ ota_1,    app,  ota_1,   ,        1900K,
 
 ### ESP-IDF Version Compatibility
 
-**Tested Versions**:
-- ESP-IDF 5.3.1 ✓ (Recommended - fully tested)
-- ESP-IDF 5.5.x ⚠️ (Experimental - build tested but not runtime validated)
-
-**Migration from 4.x to 5.3+**:
-The main breaking changes are in MCPWM API and component management. All firmware components have been updated for 5.3 compatibility. Testing on newer versions (5.4, 5.5) shows successful compilation but requires runtime verification.
+**Target Version**: ESP-IDF v6.1-dev
 
 **Component Dependencies**:
 - `espressif/led_strip`: Required by pablo-board and pinky-board
@@ -733,7 +728,7 @@ stargate-mainboard-esp32/
 ### Build Commands
 ```bash
 # Setup ESP-IDF environment
-. ~/esp/esp-idf-5.3/export.sh
+. ~/esp/esp-idf-6.1/export.sh
 
 # Build specific firmware
 cd firmware/stargate-fw/pinky-board

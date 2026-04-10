@@ -552,15 +552,15 @@ ESP_LOGD(TAG, "Received action: %u", action);
 ### Connection Status
 **Check via Web API**:
 ```bash
-curl http://stargate.local/api/ring/status
+curl http://stargate.local/api/getstatus
 ```
 
-**Response**:
+**Response** (check `is_ring_connected` field):
 ```json
 {
-    "connected": true,
-    "rssi": -45,
-    "last_heartbeat": 1234567890
+    "is_ring_connected": true,
+    "status_text": "Idle",
+    "..."
 }
 ```
 

@@ -699,7 +699,7 @@ GET https://api.thestargateproject.com/get_fan_gates.php?galaxy=Milky%20Way
 
 ---
 
-**Last Updated**: 2026-01-30
+**Last Updated**: 2026-04-10
 **API Version**: 1.0
-**ESP-IDF Version**: 5.5.1
+**ESP-IDF Version**: v6.1-dev
 **Firmware**: pinky-board implementation

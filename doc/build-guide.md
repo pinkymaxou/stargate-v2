@@ -16,12 +16,12 @@ Complete guide for building, deploying, and troubleshooting the Stargate Mainboa
 
 ### Required Software
 
-1. **ESP-IDF 5.3.1** (Recommended)
+1. **ESP-IDF v6.1-dev** (Required)
 ```bash
 mkdir -p ~/esp
 cd ~/esp
-git clone -b v5.3.1 --recursive https://github.com/espressif/esp-idf.git esp-idf-5.3
-cd esp-idf-5.3
+git clone -b v6.1-dev --recursive https://github.com/espressif/esp-idf.git esp-idf-6.1
+cd esp-idf-6.1
 ./install.sh
 ```
 
@@ -404,10 +404,10 @@ cd ~/stargate-mainboard-esp32/firmware && \
 For issues and questions:
 - Check [Troubleshooting](README.md#troubleshooting) section
 - Review [Architecture](architecture.md) documentation
-- Check ESP-IDF documentation: https://docs.espressif.com/projects/esp-idf/en/v5.3.1/
-- Report bugs: https://github.com/user/stargate-mainboard-esp32/issues
+- Check ESP-IDF documentation: https://docs.espressif.com/projects/esp-idf/en/latest/
+- Report bugs: https://github.com/pinkymaxou/stargate-v2/issues
 
 ---
 
-Last Updated: 2026-01-26
-ESP-IDF Version: 5.3.1
+Last Updated: 2026-04-10
+ESP-IDF Version: v6.1-dev
