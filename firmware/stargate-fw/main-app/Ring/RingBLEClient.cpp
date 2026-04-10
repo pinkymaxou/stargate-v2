@@ -32,116 +32,116 @@ RingBLEClient::RingBLEClient()
 {
 }
 
-void RingBLEClient::Init()
+void RingBLEClient::init()
 {
     m_mutex_handle = xSemaphoreCreateMutexStatic(&m_mutex_buffer);
     ESP_LOGD(TAG, "RingBLEClient initialized");
 }
 
-void RingBLEClient::Start()
+void RingBLEClient::start()
 {
-    LockMutex();
+    lockMutex();
     ESP_LOGI(TAG, "Starting Ring BLE client");
 
-    if (pdPASS != xTaskCreatePinnedToCore(TaskRunning, "RingBLE", 4096, (void*)this,
+    if (pdPASS != xTaskCreatePinnedToCore(taskRunning, "RingBLE", 4096, (void*)this,
                                  FWCONFIG_RINGCOMM_PRIORITY_DEFAULT,
                                  &m_task_handle,
                                  FWCONFIG_RINGCOMM_COREID))
     {
         ESP_ERROR_CHECK(ESP_FAIL);
     }
-    UnlockMutex();
+    unlockMutex();
 }
 
-bool RingBLEClient::GetIsConnected()
+bool RingBLEClient::getIsConnected()
 {
     return m_is_connected && m_char_discovered;
 }
 
-void RingBLEClient::SendHeartbeat()
+void RingBLEClient::sendHeartbeat()
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send heartbeat");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     uint8_t data[1] = { BLE_ACTION_HEARTBEAT };
-    WriteCharacteristic(data, 1);
-    UnlockMutex();
+    writeCharacteristic(data, 1);
+    unlockMutex();
 }
 
-void RingBLEClient::SendAnimation(SGUCommNS::EChevronAnimation animation)
+void RingBLEClient::sendAnimation(SGUCommNS::EChevronAnimation animation)
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send animation");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     uint8_t data[2] = { BLE_ACTION_ANIMATION, (uint8_t)animation };
-    WriteCharacteristic(data, 2);
-    UnlockMutex();
+    writeCharacteristic(data, 2);
+    unlockMutex();
 }
 
-void RingBLEClient::SendSetSymbols(const uint8_t symbol_bits[6])
+void RingBLEClient::sendSetSymbols(const uint8_t symbol_bits[6])
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send symbols");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     uint8_t data[7];
     data[0] = BLE_ACTION_SET_SYMBOLS;
     memcpy(&data[1], symbol_bits, 6);
-    WriteCharacteristic(data, 7);
-    UnlockMutex();
+    writeCharacteristic(data, 7);
+    unlockMutex();
 }
 
-void RingBLEClient::SendPowerOff()
+void RingBLEClient::sendPowerOff()
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send power off");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     uint8_t data[1] = { BLE_ACTION_POWER_OFF };
-    WriteCharacteristic(data, 1);
-    UnlockMutex();
+    writeCharacteristic(data, 1);
+    unlockMutex();
 }
 
-void RingBLEClient::SendLightUpSymbol(uint8_t symbol_index)
+void RingBLEClient::sendLightUpSymbol(uint8_t symbol_index)
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send light symbol");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     const uint8_t data[3] = { BLE_ACTION_LIGHT_SYMBOL, symbol_index, 25 };
-    WriteCharacteristic(data, sizeof(data));
-    UnlockMutex();
+    writeCharacteristic(data, sizeof(data));
+    unlockMutex();
 }
 
-void RingBLEClient::SendGotoFactory()
+void RingBLEClient::sendGotoFactory()
 {
-    if (!GetIsConnected())
+    if (!getIsConnected())
     {
         ESP_LOGW(TAG, "Not connected, cannot send goto factory");
         return;
     }
 
-    LockMutex();
+    lockMutex();
     uint8_t data[1] = { BLE_ACTION_GOTO_FACTORY };
-    WriteCharacteristic(data, 1);
-    UnlockMutex();
+    writeCharacteristic(data, 1);
+    unlockMutex();
 }
 
 static int onWriteComplete(uint16_t conn_handle, const struct ble_gatt_error* error,
@@ -154,7 +154,7 @@ static int onWriteComplete(uint16_t conn_handle, const struct ble_gatt_error* er
     return 0;
 }
 
-SGResult RingBLEClient::WriteCharacteristic(const uint8_t* data, uint16_t len)
+SGResult RingBLEClient::writeCharacteristic(const uint8_t* data, uint16_t len)
 {
     if (!m_char_discovered)
     {
@@ -228,7 +228,7 @@ int onDiscoveryComplete(uint16_t conn_handle,
             RingBLEClient::getI().m_char_discovered = true;
 
             // Connection animation
-            client->SendAnimation(SGUCommNS::EChevronAnimation::Chevron_FadeIn);
+            client->sendAnimation(SGUCommNS::EChevronAnimation::Chevron_FadeIn);
         }
         else
         {
@@ -323,7 +323,7 @@ int RingBLEClient::gapEventHandler(struct ble_gap_event* event, void* arg)
     return 0;
 }
 
-void RingBLEClient::StartScan()
+void RingBLEClient::startScan()
 {
     if (m_is_scanning)
     {
@@ -355,7 +355,7 @@ void RingBLEClient::StartScan()
     }
 }
 
-void RingBLEClient::ConnectToRing()
+void RingBLEClient::connectToRing()
 {
     if (!m_ring_found)
     {
@@ -391,7 +391,7 @@ void onBLESync(void)
 {
     ESP_LOGI(TAG, "BLE host synchronized");
     // Start scanning
-    RingBLEClient::getI().StartScan();
+    RingBLEClient::getI().startScan();
 }
 
 void onBLEReset(int reason)
@@ -406,7 +406,7 @@ static void bleHostTask(void* param)
     nimble_port_freertos_deinit();
 }
 
-void RingBLEClient::TaskRunning(void* arg)
+void RingBLEClient::taskRunning(void* arg)
 {
     RingBLEClient* client = (RingBLEClient*)arg;
 
@@ -438,12 +438,12 @@ void RingBLEClient::TaskRunning(void* arg)
                 if (!client->m_ring_found)
                 {
                     ESP_LOGI(TAG, "Starting scan...");
-                    client->StartScan();
+                    client->startScan();
                 }
                 else
                 {
                     // Try to connect
-                    client->ConnectToRing();
+                    client->connectToRing();
                 }
             }
         }

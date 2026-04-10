@@ -4,7 +4,7 @@
 
 #define TAG "OTA_API"
 
-esp_err_t WebServer::OTAUploadPostHandler(httpd_req_t* req)
+esp_err_t WebServer::otaUploadPostHandler(httpd_req_t* req)
 {
     {
     ESP_LOGI(TAG, "OTAUploadPostHandler / uri: %s", req->uri);

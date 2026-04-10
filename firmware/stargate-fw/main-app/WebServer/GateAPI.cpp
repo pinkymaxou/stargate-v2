@@ -5,7 +5,7 @@
 #include "SGUComm.hpp"
 #include "../Wormhole/Wormhole.hpp"
 
-char* WebServer::GetGalaxyInfoJSON(GateGalaxy gate_galaxy)
+char* WebServer::getGalaxyInfoJSON(GateGalaxy gate_galaxy)
 {
     cJSON* root = nullptr;
     {
@@ -15,16 +15,16 @@ char* WebServer::GetGalaxyInfoJSON(GateGalaxy gate_galaxy)
             goto ERROR;
         }
 
-        BaseGate& bg = GateFactory::Get(gate_galaxy);
+        BaseGate& bg = GateFactory::get(gate_galaxy);
         // TODO: Add a cache expiration value
 
         cJSON_AddItemToObject(root, "name", cJSON_CreateString(bg.name));
         // ------------------------------
         // Symbols
         cJSON* symbols_entries = cJSON_AddArrayToObject(root, "symbols");
-        for(int i = 1; i <= bg.GetSymbolCount(); i++)
+        for(int i = 1; i <= bg.getSymbolCount(); i++)
         {
-            const GateSymbol& sym = bg.GetSymbol(i);
+            const GateSymbol& sym = bg.getSymbol(i);
 
             cJSON* new_file = cJSON_CreateObject();
             cJSON_AddItemToObject(new_file, "id", cJSON_CreateNumber((int)sym.number));
@@ -35,18 +35,18 @@ char* WebServer::GetGalaxyInfoJSON(GateGalaxy gate_galaxy)
         // ------------------------------
         // Gate Address
         cJSON* addresses_entries = cJSON_AddArrayToObject(root, "addresses");
-        for(int i = 0; i < bg.GetAddressCount(); i++)
+        for(int i = 0; i < bg.getAddressCount(); i++)
         {
-            const GateAddress& gate_addr = bg.GetAddress(i);
+            const GateAddress& gate_addr = bg.getAddress(i);
 
             cJSON* new_file = cJSON_CreateObject();
             cJSON_AddItemToObject(new_file, "id", cJSON_CreateNumber(i));
-            cJSON_AddItemToObject(new_file, "name", cJSON_CreateString(gate_addr.GetName()));
+            cJSON_AddItemToObject(new_file, "name", cJSON_CreateString(gate_addr.getName()));
             // Address
             cJSON* address_entries = cJSON_AddArrayToObject(new_file, "address");
-            for(int i = 0; i < gate_addr.GetSymbolCount(); i++)
+            for(int i = 0; i < gate_addr.getSymbolCount(); i++)
             {
-                const uint8_t symbol_num = gate_addr.GetSymbol(i);
+                const uint8_t symbol_num = gate_addr.getSymbol(i);
                 cJSON_AddItemToArray(address_entries, cJSON_CreateNumber(symbol_num));
             }
             cJSON_AddItemToArray(addresses_entries, new_file);
@@ -72,11 +72,9 @@ char* WebServer::GetGalaxyInfoJSON(GateGalaxy gate_galaxy)
         cJSON* wormhole_entries = cJSON_AddArrayToObject(root, "wormhole_types");
         for(int i = 0; i < (int)Wormhole::EType::Count; i++)
         {
-            const GateAddress& gate_addr = bg.GetAddress(i);
-
             cJSON* new_file = cJSON_CreateObject();
             cJSON_AddItemToObject(new_file, "id", cJSON_CreateNumber(i));
-            cJSON_AddItemToObject(new_file, "name", cJSON_CreateString(Wormhole::GetTypeText( (Wormhole::EType) i)));
+            cJSON_AddItemToObject(new_file, "name", cJSON_CreateString(Wormhole::getTypeText( (Wormhole::EType) i)));
             cJSON_AddItemToArray(wormhole_entries, new_file);
         }
 

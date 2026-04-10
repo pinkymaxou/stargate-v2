@@ -49,24 +49,24 @@ class Settings
     void operator=(Settings const&) = delete;
 
     public:
-    void Init();
+    void init();
 
-    void Load();
-    void Commit();
+    void load();
+    void commit();
 
-    int32_t GetValueInt32(Settings::Entry entry);
-    NVSJSON_ESETRET SetValueInt32(Settings::Entry entry, int32_t new_value);
-    NVSJSON_ESETRET SetValueInt32(Settings::Entry entry, bool is_dry_run, int32_t new_value);
+    int32_t getValueInt32(Settings::Entry entry);
+    NVSJSON_ESETRET setValueInt32(Settings::Entry entry, int32_t new_value);
+    NVSJSON_ESETRET setValueInt32(Settings::Entry entry, bool is_dry_run, int32_t new_value);
 
-    void GetValueString(Settings::Entry entry, char* out_value, size_t* length);
-    NVSJSON_ESETRET SetValueString(Settings::Entry entry, bool is_dry_run, const char* value);
+    void getValueString(Settings::Entry entry, char* out_value, size_t* length);
+    NVSJSON_ESETRET setValueString(Settings::Entry entry, bool is_dry_run, const char* value);
 
-    double GetValueDouble(Settings::Entry entry);
-    NVSJSON_ESETRET SetValueDouble(Settings::Entry entry, bool is_dry_run, double value);
-    NVSJSON_ESETRET SetValueDouble(Settings::Entry entry, double value);
+    double getValueDouble(Settings::Entry entry);
+    NVSJSON_ESETRET setValueDouble(Settings::Entry entry, bool is_dry_run, double value);
+    NVSJSON_ESETRET setValueDouble(Settings::Entry entry, double value);
 
-    bool ImportJSON(const char* json);
-    char* ExportJSON();
+    bool importJSON(const char* json);
+    char* exportJSON();
 
     // Instance
     static Settings& getI()
@@ -75,14 +75,14 @@ class Settings
         return instance;
     }
     private:
-    static bool ValidateWifiPassword(const NVSJSON_SSettingEntry* setting_entry, const char* value);
+    static bool validateWifiPassword(const NVSJSON_SSettingEntry* setting_entry, const char* value);
     const NVSJSON_SSettingEntry m_config_entries[(int)Settings::Entry::Count] =
     {
         // // WiFi Station related
     //                                                                                                                                      DEFAULT MIN MAX
         [(int)Settings::Entry::WSTAIsActive] =            NVSJSON_INITINT32_RNG("WSTA.IsActive",   "Wi-Fi is active",                       0,    0, 1, NVSJSON_EFLAGS_NeedsReboot),
         [(int)Settings::Entry::WSTASSID] =                NVSJSON_INITSTRING("WSTA.SSID",          "Wi-Fi (SSID)",                          "", NVSJSON_EFLAGS_NeedsReboot),
-        [(int)Settings::Entry::WSTAPass] =                NVSJSON_INITSTRING_VAL("WSTA.Pass",      "Wi-Fi password",                        "", ValidateWifiPassword, (NVSJSON_EFLAGS)(NVSJSON_EFLAGS_Secret | NVSJSON_EFLAGS_NeedsReboot)),
+        [(int)Settings::Entry::WSTAPass] =                NVSJSON_INITSTRING_VAL("WSTA.Pass",      "Wi-Fi password",                        "", validateWifiPassword, (NVSJSON_EFLAGS)(NVSJSON_EFLAGS_Secret | NVSJSON_EFLAGS_NeedsReboot)),
 
         [(int)Settings::Entry::ClampLockedPWM] =          NVSJSON_INITDOUBLE_RNG("Clamp.LockedPWM", "Servo motor locked PWM",               0.78f, 0.0f,   1.0f, NVSJSON_EFLAGS_None),
         [(int)Settings::Entry::ClampReleasedPWM] =        NVSJSON_INITDOUBLE_RNG("Clamp.ReleasPWM", "Servo motor released PWM",             0.45f, 0.0f,   1.0f, NVSJSON_EFLAGS_None),

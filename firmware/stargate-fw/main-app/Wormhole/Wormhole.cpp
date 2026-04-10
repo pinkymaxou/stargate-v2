@@ -12,7 +12,7 @@ Wormhole::Wormhole(SGHW_HAL* hal, EType wormhole_type) :
     m_wormhole_type(wormhole_type),
     m_hal(hal)
 {
-    m_max_brightness = Settings::getI().GetValueInt32(Settings::Entry::WormholeMaxLight);
+    m_max_brightness = Settings::getI().getValueInt32(Settings::Entry::WormholeMaxLight);
 
     for(int i = 0; i < LEDEFFECT_COUNT; i++)
     {
@@ -23,29 +23,29 @@ Wormhole::Wormhole(SGHW_HAL* hal, EType wormhole_type) :
     }
 }
 
-void Wormhole::Begin()
+void Wormhole::begin()
 {
-    ClearAll();
+    clearAll();
     m_is_run_initialized = false;
 }
 
-void Wormhole::OpeningAnimation()
+void Wormhole::openingAnimation()
 {
-    ClearAll();
-    Illuminatring(ERing::Ring0, EDir::FadeIn);
-    ClearAll();
-    Illuminatring(ERing::Ring1, EDir::FadeIn);
-    ClearAll();
-    Illuminatring(ERing::Ring2, EDir::FadeIn);
-    ClearAll();
-    Illuminatring(ERing::Ring3, EDir::FadeIn);
+    clearAll();
+    illuminatring(ERing::Ring0, EDir::FadeIn);
+    clearAll();
+    illuminatring(ERing::Ring1, EDir::FadeIn);
+    clearAll();
+    illuminatring(ERing::Ring2, EDir::FadeIn);
+    clearAll();
+    illuminatring(ERing::Ring3, EDir::FadeIn);
     vTaskDelay(pdMS_TO_TICKS(150));
-    Illuminatring(ERing::Ring2, EDir::FadeIn);
-    Illuminatring(ERing::Ring1, EDir::FadeIn);
-    Illuminatring(ERing::Ring0, EDir::FadeIn);
+    illuminatring(ERing::Ring2, EDir::FadeIn);
+    illuminatring(ERing::Ring1, EDir::FadeIn);
+    illuminatring(ERing::Ring0, EDir::FadeIn);
 }
 
-SGResult Wormhole::RunTicks()
+SGResult Wormhole::runTicks()
 {
     const float min_f = 0.30f;
     const float max_f = 1.00f;
@@ -53,7 +53,7 @@ SGResult Wormhole::RunTicks()
     if (!m_is_run_initialized)
     {
         // Random initialization
-        for(int i = 0; i < m_hal->GetWHPixelCount(); i++)
+        for(int i = 0; i < m_hal->getWHPixelCount(); i++)
         {
             SLedEffect* led_effect = &m_led_effects[i];
             led_effect->one = min_f + (((esp_random() % 100) * 0.01f) * (max_f - min_f));
@@ -62,7 +62,7 @@ SGResult Wormhole::RunTicks()
         m_is_run_initialized = true;
     }
 
-    for(int i = 0; i < m_hal->GetWHPixelCount(); i++) 
+    for(int i = 0; i < m_hal->getWHPixelCount(); i++) 
     {
         SLedEffect* led_effect = &m_led_effects[i];
 
@@ -86,21 +86,21 @@ SGResult Wormhole::RunTicks()
 
         // Make the outer ring glowing less
         constexpr float ring_corr_values[(int)Wormhole::ERing::Count] = { 0.1f, 0.6f, 0.9f, 1.0f };
-        corr_value *= ring_corr_values[(int)GetRing(i)];
+        corr_value *= ring_corr_values[(int)getRing(i)];
 
         const uint8_t pwm = (uint8_t)(corr_value*m_max_brightness);
 
         if (EType::NormalSG1 == m_wormhole_type)
         {
-            m_hal->SetWHPixel(i, MISCMACRO_MAX(pwm, 16), MISCMACRO_MAX(pwm, 16), MISCMACRO_MIN(16+pwm, m_max_brightness-16));
+            m_hal->setWHPixel(i, MISCMACRO_MAX(pwm, 16), MISCMACRO_MAX(pwm, 16), MISCMACRO_MIN(16+pwm, m_max_brightness-16));
         }
         else if (EType::NormalSGU == m_wormhole_type)
         {
-            m_hal->SetWHPixel(i, pwm, pwm, pwm);
+            m_hal->setWHPixel(i, pwm, pwm, pwm);
         }
     }
 
-    if (!m_hal->RefreshWHPixels())
+    if (!m_hal->refreshWHPixels())
     {
         ESP_LOGW(TAG, "Error during refresh, may be caused by power instability");
         return SGResult::Wormhole_PowerInstability;
@@ -112,23 +112,23 @@ SGResult Wormhole::RunTicks()
     return SGResult::OK;
 }
 
-void Wormhole::ClosingAnimation()
+void Wormhole::closingAnimation()
 {
-    Illuminatring(ERing::Ring3, EDir::FadeOut);
-    Illuminatring(ERing::Ring2, EDir::FadeOut);
-    Illuminatring(ERing::Ring1, EDir::FadeOut);
-    Illuminatring(ERing::Ring0, EDir::FadeOut);
+    illuminatring(ERing::Ring3, EDir::FadeOut);
+    illuminatring(ERing::Ring2, EDir::FadeOut);
+    illuminatring(ERing::Ring1, EDir::FadeOut);
+    illuminatring(ERing::Ring0, EDir::FadeOut);
 
     // Clear all pixels
-    ClearAll();
+    clearAll();
 }
 
-void Wormhole::End()
+void Wormhole::end()
 {
-    ClearAll();
+    clearAll();
 }
 
-Wormhole::ERing Wormhole::GetRing(int zero_based_index)
+Wormhole::ERing Wormhole::getRing(int zero_based_index)
 {
     for(int j = 0; j < sizeof(m_ring0_one_based)/sizeof(m_ring0_one_based[0]); j++)
         if (m_ring0_one_based[j]-1 == zero_based_index)
@@ -145,13 +145,13 @@ Wormhole::ERing Wormhole::GetRing(int zero_based_index)
     return Wormhole::ERing::Ring0;
 }
 
-void Wormhole::ClearAll()
+void Wormhole::clearAll()
 {
-    m_hal->ClearAllWHPixels();
-    m_hal->RefreshWHPixels();
+    m_hal->clearAllWHPixels();
+    m_hal->refreshWHPixels();
 }
 
-void Wormhole::Illuminatring(Wormhole::ERing ring, Wormhole::EDir dir)
+void Wormhole::illuminatring(Wormhole::ERing ring, Wormhole::EDir dir)
 {
     for(int32_t step = 0; step <= 100; step += 10)
     {
@@ -159,9 +159,9 @@ void Wormhole::Illuminatring(Wormhole::ERing ring, Wormhole::EDir dir)
         const SRingEntry* ring_entries = &m_ring_entries[(int)ring];
         for(int i = 0; i < ring_entries->ring_count; i++)
         {
-            m_hal->SetWHPixel(ring_entries->ring[i]-1, (uint8_t)(m_max_brightness * brig), (uint8_t)(m_max_brightness * brig), (uint8_t)(m_max_brightness * brig));
+            m_hal->setWHPixel(ring_entries->ring[i]-1, (uint8_t)(m_max_brightness * brig), (uint8_t)(m_max_brightness * brig), (uint8_t)(m_max_brightness * brig));
         }
-        m_hal->RefreshWHPixels();
+        m_hal->refreshWHPixels();
         vTaskDelay(pdMS_TO_TICKS(5));
     }
 }

@@ -10,7 +10,7 @@
 
 #define TAG "MainApp"
 
-void App::Init(Config* config)
+void App::init(Config* config)
 {
     m_config = config;
     //Initialize NVS
@@ -25,38 +25,38 @@ void App::Init(Config* config)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     ESP_LOGI(TAG, "Initialize settings");
-    Settings::getI().Init();
+    Settings::getI().init();
     ESP_LOGI(TAG, "Loading settings");
-    Settings::getI().Load();
+    Settings::getI().load();
 
     // Initialize all modules
     ESP_LOGI(TAG, "Initialize gate control");
-    m_config->m_sghw_hal->Init();
+    m_config->m_sghw_hal->init();
     ESP_LOGI(TAG, "Loading sound FX");
-    SoundFX::getI().Init(m_config->m_sghw_hal);
+    SoundFX::getI().init(m_config->m_sghw_hal);
     ESP_LOGI(TAG, "Initialize WiFi Manager");
-    WifiMgr::getI().Init();
+    WifiMgr::getI().init();
     ESP_LOGI(TAG, "Initialize web server");
-    WebServer::getI().Init(m_config->m_sghw_hal);
+    WebServer::getI().init(m_config->m_sghw_hal);
     ESP_LOGI(TAG, "Initialize gate control");
-    GateControl::getI().Init(config->m_sghw_hal);
+    GateControl::getI().init(config->m_sghw_hal);
     ESP_LOGI(TAG, "Loading ring BLE communication");
-    RingBLEClient::getI().Init();
+    RingBLEClient::getI().init();
     ESP_LOGI(TAG, "HTTP Client for external calls");
-    HttpClient::getI().Init();
+    HttpClient::getI().init();
 
     ESP_LOGI(TAG, "Starting Wi-Fi");
-    WifiMgr::getI().Start();
+    WifiMgr::getI().start();
     ESP_LOGI(TAG, "Starting ring BLE communication");
-    RingBLEClient::getI().Start();
+    RingBLEClient::getI().start();
     ESP_LOGI(TAG, "Starting sound FX");
-    SoundFX::getI().Start();
+    SoundFX::getI().start();
     ESP_LOGI(TAG, "Starting gate control");
-    GateControl::getI().StartTask();
+    GateControl::getI().startTask();
     ESP_LOGI(TAG, "Starting web server");
-    WebServer::getI().Start();
+    WebServer::getI().start();
     ESP_LOGI(TAG, "Starting HTTP Client");
-    HttpClient::getI().Start();
+    HttpClient::getI().start();
 
     // For debug purpose ...
     char* const all_task = (char*)malloc(4096);
@@ -65,14 +65,14 @@ void App::Init(Config* config)
     free(all_task);
 
     // Autocalibrate as the default action
-    // GateControl::getI().QueueAutoHome();
+    // GateControl::getI().queueAutoHome();
 }
 
-void App::LoopTick()
+void App::loopTick()
 {
     bool sanity = false;
     // The least interesting task to ever exist.
-    m_config->m_sghw_hal->SetSanityLED(sanity);
+    m_config->m_sghw_hal->setSanityLED(sanity);
     sanity = !sanity;
     vTaskDelay(pdMS_TO_TICKS(250));
 }

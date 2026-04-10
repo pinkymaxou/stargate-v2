@@ -85,19 +85,19 @@ class GateControl
     GateControl(GateControl const&) = delete;
     void operator=(GateControl const&) = delete;
 
-    void Init(SGHW_HAL* sghw_hal);
+    void init(SGHW_HAL* sghw_hal);
 
-    void StartTask();
+    void startTask();
 
     // Actions
-    void QueueAutoHome();
-    void QueueAutoCalibrate();
-    void QueueDialAddress(GateAddress& ga);
-    void QueueManualWormhole(Wormhole::EType type);
+    void queueAutoHome();
+    void queueAutoCalibrate();
+    void queueDialAddress(GateAddress& ga);
+    void queueManualWormhole(Wormhole::EType type);
 
-    void AbortAction();
+    void abortAction();
 
-    void GetState(UIState& ui_state);
+    void getState(UIState& ui_state);
 
     static GateControl& getI()
     {
@@ -105,18 +105,18 @@ class GateControl
         return instance;
     }
     private:
-    void PriQueueAction(SCmd cmd);
+    void priQueueAction(SCmd cmd);
 
-    SGResult AutoCalibrate();   /*!< @brief This procedure will find how many step are necessary to complete a full ring rotation. */
-    SGResult AutoHome();        /*!< @brief Do the homing sequence, it will spin until it find it's home position. */
-    SGResult DialAddress(const SDialArg& dial_arg);
+    SGResult autoCalibrate();   /*!< @brief This procedure will find how many step are necessary to complete a full ring rotation. */
+    SGResult autoHome();        /*!< @brief Do the homing sequence, it will spin until it find it's home position. */
+    SGResult dialAddress(const SDialArg& dial_arg);
 
-    void AnimRampLight(bool is_active);
+    void animRampLight(bool is_active);
 
-    void LockClamp();
-    void ReleaseClamp();
+    void lockClamp();
+    void releaseClamp();
     private:
-    static void TaskRunning(void* arg);
+    static void taskRunning(void* arg);
 
     TaskHandle_t m_gate_control_handle;
 
@@ -156,5 +156,5 @@ class GateControl
     static_assert((int)ECmd::Count == (sizeof(m_texts)/sizeof(m_texts[0])), "Command text missmatch");
 
     public:
-    inline static const char* GetCmdText(ECmd cmd) { return m_texts[(int)cmd]; }
+    inline static const char* getCmdText(ECmd cmd) { return m_texts[(int)cmd]; }
 };

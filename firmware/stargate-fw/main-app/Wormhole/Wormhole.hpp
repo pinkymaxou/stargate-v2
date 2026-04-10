@@ -50,11 +50,11 @@ class Wormhole
     public:
     Wormhole(SGHW_HAL* hal, EType wormhole_type);
 
-    void Begin();
-    void OpeningAnimation();
-    SGResult RunTicks();
-    void ClosingAnimation();
-    void End();
+    void begin();
+    void openingAnimation();
+    SGResult runTicks();
+    void closingAnimation();
+    void end();
 
     private:
     EType m_wormhole_type;
@@ -67,10 +67,10 @@ class Wormhole
     SLedEffect m_led_effects[LEDEFFECT_COUNT];
 
     public:
-    static bool Validatwormhole_type(EType wormhole_type);
+    static bool validateWormholeType(EType wormhole_type);
     private:
-    void Illuminatring(ERing ring, Wormhole::EDir dir);
-    void ClearAll();
+    void illuminatring(ERing ring, Wormhole::EDir dir);
+    void clearAll();
 
     // One based, but I should have made it 0 based like a respectable programmer.
     // do be fair that's how it's labelled on  the board.
@@ -94,7 +94,7 @@ class Wormhole
         [(int)ERing::Ring3] = { .ring = m_ring3_one_based, .ring_count = RING3_COUNT }
     };
 
-    static ERing GetRing(int zero_based_index);
+    static ERing getRing(int zero_based_index);
 
     public:
     inline static constexpr const char* m_texts[] =
@@ -106,5 +106,5 @@ class Wormhole
     };
     static_assert((int)EType::Count == sizeof(m_texts)/sizeof(m_texts[0]), "Text missmatch");
 
-    inline static const char* GetTypeText(EType type) { return m_texts[(int)type]; }
+    inline static const char* getTypeText(EType type) { return m_texts[(int)type]; }
 };

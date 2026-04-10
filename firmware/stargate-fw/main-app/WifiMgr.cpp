@@ -6,7 +6,7 @@
 
 static const char* TAG = "WifiMgr";
 
-void WifiMgr::wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+void WifiMgr::wifiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     // WifiMgr* wifi_mgr = (WifiMgr*)arg;
     if (WIFI_EVENT_AP_STACONNECTED == event_id)
@@ -25,7 +25,7 @@ void WifiMgr::wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t
     }
 }
 
-void WifiMgr::wifistation_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+void WifiMgr::wifistationEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     WifiMgr* wifi_mgr = (WifiMgr*)arg;
     if (WIFI_EVENT == event_base && WIFI_EVENT_STA_START == event_id)
@@ -58,12 +58,12 @@ void WifiMgr::wifistation_event_handler(void* arg, esp_event_base_t event_base, 
     }
 }
 
-void WifiMgr::Init()
+void WifiMgr::init()
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    const bool is_wifi_sta = 1 == Settings::getI().GetValueInt32(Settings::Entry::WSTAIsActive);
+    const bool is_wifi_sta = 1 == Settings::getI().getValueInt32(Settings::Entry::WSTAIsActive);
     if (is_wifi_sta)
     {
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA) );
@@ -86,7 +86,7 @@ void WifiMgr::Init()
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
-                                                        &wifi_event_handler,
+                                                        &wifiEventHandler,
                                                         this,
                                                         nullptr));
 
@@ -124,18 +124,18 @@ void WifiMgr::Init()
         esp_event_handler_instance_t instance_got_ip6;
         ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                             ESP_EVENT_ANY_ID,
-                                                            &wifistation_event_handler,
+                                                            &wifistationEventHandler,
                                                             this,
                                                             &instance_any_id));
 
         ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                             IP_EVENT_STA_GOT_IP,
-                                                            &wifistation_event_handler,
+                                                            &wifistationEventHandler,
                                                             this,
                                                             &instance_got_ip));
         ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                             IP_EVENT_GOT_IP6,
-                                                            &wifistation_event_handler,
+                                                            &wifistationEventHandler,
                                                             this,
                                                             &instance_got_ip6));
 
@@ -146,9 +146,9 @@ void WifiMgr::Init()
         wifi_configSTA.sta.sae_pwe_h2e = WPA3_SAE_PWE_BOTH;
 
         size_t sta_ssid_length = 32;
-        Settings::getI().GetValueString(Settings::Entry::WSTASSID, (char*)wifi_configSTA.sta.ssid, &sta_ssid_length);
+        Settings::getI().getValueString(Settings::Entry::WSTASSID, (char*)wifi_configSTA.sta.ssid, &sta_ssid_length);
         size_t sta_pass_length = 64;
-        Settings::getI().GetValueString(Settings::Entry::WSTAPass, (char*)wifi_configSTA.sta.password, &sta_pass_length);
+        Settings::getI().getValueString(Settings::Entry::WSTAPass, (char*)wifi_configSTA.sta.password, &sta_pass_length);
 
         ESP_LOGI(TAG, "STA mode is active, attempt to connect to ssid: %s", wifi_configSTA.sta.ssid);
 
@@ -158,18 +158,18 @@ void WifiMgr::Init()
     // SNTP
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, "pool.ntp.org");
-    esp_sntp_set_time_sync_notification_cb(time_sync_notification_cb);
+    esp_sntp_set_time_sync_notification_cb(timeSyncNotificationCb);
     ESP_LOGI(TAG, "Initializing SNTP");
     esp_sntp_init();
 }
 
-void WifiMgr::Start()
+void WifiMgr::start()
 {
     // Start AP + STA
     ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
-bool WifiMgr::GetWiFiSTAIP(esp_netif_ip_info_t& outIP)
+bool WifiMgr::getWiFiSTAIP(esp_netif_ip_info_t& outIP)
 {
     if (nullptr != m_wifi_sta)
     {
@@ -179,7 +179,7 @@ bool WifiMgr::GetWiFiSTAIP(esp_netif_ip_info_t& outIP)
     return false;
 }
 
-bool WifiMgr::GetWiFiSoftAPIP(esp_netif_ip_info_t& outIP)
+bool WifiMgr::getWiFiSoftAPIP(esp_netif_ip_info_t& outIP)
 {
     if (nullptr != m_wifi_soft_ap)
     {
@@ -189,7 +189,7 @@ bool WifiMgr::GetWiFiSoftAPIP(esp_netif_ip_info_t& outIP)
     return false;
 }
 
-int32_t WifiMgr::GetWiFiSTAIPv6(esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRESSES])
+int32_t WifiMgr::getWiFiSTAIPv6(esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRESSES])
 {
     if (nullptr != m_wifi_sta)
     {
@@ -198,7 +198,7 @@ int32_t WifiMgr::GetWiFiSTAIPv6(esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRE
     return 0;
 }
 
-void WifiMgr::time_sync_notification_cb(struct timeval* tv)
+void WifiMgr::timeSyncNotificationCb(struct timeval* tv)
 {
     // settimeofday(tv, NULL);
     ESP_LOGI(TAG, "Notification of a time synchronization event, sec: %d", (int)tv->tv_sec);

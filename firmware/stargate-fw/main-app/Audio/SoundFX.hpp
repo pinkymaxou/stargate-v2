@@ -43,13 +43,13 @@ class SoundFX
     void operator=(SoundFX const&) = delete;
 
     public:
-    void Init(SGHW_HAL* sghw_hal);
-    void Start();
+    void init(SGHW_HAL* sghw_hal);
+    void start();
 
-    SGResult PlaySound(FileID sound_file, bool repeat);
-    void StopSound();
+    SGResult playSound(FileID sound_file, bool repeat);
+    void stopSound();
 
-    const SoundFile* GetFile(SoundFX::FileID file)
+    const SoundFile* getFile(SoundFX::FileID file)
     {
         if (0 > (int)file || (int)SoundFX::FileID::Count <= (int)file)
         {
@@ -58,7 +58,7 @@ class SoundFX
         return &m_soundFiles[(uint32_t)file];
     }
 
-    uint32_t GetFileCount() { return SOUNDFILE_COUNT; }
+    uint32_t getFileCount() { return SOUNDFILE_COUNT; }
 
     static SoundFX& getI()
     {

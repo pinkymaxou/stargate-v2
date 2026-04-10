@@ -34,15 +34,15 @@ class WifiMgr
     void operator=(WifiMgr const&) = delete;
 
     public:
-    void Init();
+    void init();
 
-    void Start();
+    void start();
 
-    bool GetWiFiSTAIP(esp_netif_ip_info_t& outIP);
-    bool GetWiFiSoftAPIP(esp_netif_ip_info_t& outIP);
-    int32_t GetWiFiSTAIPv6(esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRESSES]);
+    bool getWiFiSTAIP(esp_netif_ip_info_t& outIP);
+    bool getWiFiSoftAPIP(esp_netif_ip_info_t& outIP);
+    int32_t getWiFiSTAIPv6(esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRESSES]);
 
-    inline EState GetWifiSTAState() const { return m_wifi_sta_state; }
+    inline EState getWifiSTAState() const { return m_wifi_sta_state; }
 
     static WifiMgr& getI()
     {
@@ -51,10 +51,10 @@ class WifiMgr
     }
 
     private:
-    static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
-    static void wifistation_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+    static void wifiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+    static void wifistationEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
-    static void time_sync_notification_cb(struct timeval* tv);
+    static void timeSyncNotificationCb(struct timeval* tv);
 
     esp_netif_t* m_wifi_sta;
     esp_netif_t* m_wifi_soft_ap;

@@ -11,9 +11,9 @@ class GateFactory
     GateFactory() = delete;
 
     public:
-    static BaseGate& Get(GateGalaxy gate_galaxy);
+    static BaseGate& get(GateGalaxy gate_galaxy);
 
-    static UniverseGate& GetUniverseGate();
+    static UniverseGate& getUniverseGate();
 
     private:
     static inline MilkyWayGate m_milkyWayGate;

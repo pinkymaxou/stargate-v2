@@ -18,13 +18,13 @@ class HttpClient
     void operator=(HttpClient const&) = delete;
 
     public:
-    void Init();
+    void init();
 
-    void Start();
+    void start();
 
-    std::shared_ptr<char[]> GetFanGateListString();
+    std::shared_ptr<char[]> getFanGateListString();
 
-    static void TaskRunning(void* arg);
+    static void taskRunning(void* arg);
 
     static HttpClient& getI()
     {

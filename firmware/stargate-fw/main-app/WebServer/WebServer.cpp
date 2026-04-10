@@ -21,14 +21,14 @@ WebServer::WebServer()
     // API
     m_http_get_api.uri       = "/api/*";
     m_http_get_api.method    = HTTP_GET;
-    m_http_get_api.handler   = WebAPIGetHandler;
+    m_http_get_api.handler   = webAPIGetHandler;
     /* Let's pass response string in user
      * context to demonstrate it's usage */
     m_http_get_api.user_ctx  = nullptr;
 
     m_http_post_api.uri       = "/api/*";
     m_http_post_api.method    = HTTP_POST;
-    m_http_post_api.handler   = WebAPIPostHandler;
+    m_http_post_api.handler   = webAPIPostHandler;
     /* Let's pass response string in user
      * context to demonstrate it's usage */
     m_http_post_api.user_ctx = nullptr;
@@ -36,7 +36,7 @@ WebServer::WebServer()
     // OTA
     m_http_ota_upload_post.uri       = APIURL_POST_OTAUPLOAD_URI;
     m_http_ota_upload_post.method    = HTTP_POST;
-    m_http_ota_upload_post.handler   = OTAUploadPostHandler;
+    m_http_ota_upload_post.handler   = otaUploadPostHandler;
     /* Let's pass response string in user
      * context to demonstrate it's usage */
     m_http_ota_upload_post.user_ctx  = nullptr;
@@ -44,7 +44,7 @@ WebServer::WebServer()
     // Get web files
     m_http_ui.uri       = "/*";
     m_http_ui.method    = HTTP_GET;
-    m_http_ui.handler   = file_get_handler;
+    m_http_ui.handler   = fileGetHandler;
         /* Let's pass response string in user
         * context to demonstrate it's usage */
     m_http_ui.user_ctx  = nullptr;
@@ -52,7 +52,7 @@ WebServer::WebServer()
     // WebSocket
     m_http_websocket.uri       = "/ws";
     m_http_websocket.method    = HTTP_GET;
-    m_http_websocket.handler   = WebSocketHandler;
+    m_http_websocket.handler   = webSocketHandler;
     m_http_websocket.user_ctx  = nullptr;
     m_http_websocket.is_websocket = true;
 
@@ -60,7 +60,7 @@ WebServer::WebServer()
     m_websocket_mutex = xSemaphoreCreateMutexStatic(&m_websocket_mutex_buffer);
 }
 
-void WebServer::Init(SGHW_HAL* sghw_hal)
+void WebServer::init(SGHW_HAL* sghw_hal)
 {
     m_sghw_hal = sghw_hal;
 
@@ -71,7 +71,7 @@ void WebServer::Init(SGHW_HAL* sghw_hal)
     m_config.task_priority = FWCONFIG_WEBSERVERTASK_PRIORITY_DEFAULT;
 }
 
-void WebServer::Start()
+void WebServer::start()
 {
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", m_config.server_port);
@@ -91,7 +91,7 @@ void WebServer::Start()
     (strcasecmp(&filename[strlen(filename) - sizeof(ext) + 1], ext) == 0)
 
 /* Set HTTP response content type according to file extension */
-esp_err_t WebServer::set_content_type_from_file(httpd_req_t* req, const char* filename)
+esp_err_t WebServer::setContentTypeFromFile(httpd_req_t* req, const char* filename)
 {
     if (IS_FILE_EXT(filename, ".pdf"))
     {
@@ -144,7 +144,7 @@ esp_err_t WebServer::set_content_type_from_file(httpd_req_t* req, const char* fi
 }
 
 /* An HTTP GET handler */
-esp_err_t WebServer::file_get_handler(httpd_req_t* req)
+esp_err_t WebServer::fileGetHandler(httpd_req_t* req)
 {
     // Redirect root to index.html
     if (0 == strcmp(req->uri, "/"))
@@ -161,7 +161,7 @@ esp_err_t WebServer::file_get_handler(httpd_req_t* req)
 
     ESP_LOGI(TAG, "Opening file uri: %s", req->uri);
 
-    const EF_SFile* file = GetFile(req->uri+1);
+    const EF_SFile* file = getFile(req->uri+1);
     if (nullptr == file)
     {
         ESP_LOGE(TAG, "Failed to open file for reading");
@@ -169,7 +169,7 @@ esp_err_t WebServer::file_get_handler(httpd_req_t* req)
         return ESP_FAIL;
     }
 
-    set_content_type_from_file(req, file->filename);
+    setContentTypeFromFile(req, file->filename);
     if (EF_ISFILECOMPRESSED(file->flags))
     {
         httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
@@ -206,7 +206,7 @@ esp_err_t WebServer::file_get_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-const EF_SFile* WebServer::GetFile(const char* filename)
+const EF_SFile* WebServer::getFile(const char* filename)
 {
     for(int i = 0; i < EF_EFILE_COUNT; i++)
     {
@@ -220,14 +220,14 @@ const EF_SFile* WebServer::GetFile(const char* filename)
 }
 
 // WebSocket handler
-esp_err_t WebServer::WebSocketHandler(httpd_req_t* req)
+esp_err_t WebServer::webSocketHandler(httpd_req_t* req)
 {
     if (HTTP_GET == req->method)
     {
         ESP_LOGI(TAG, "WebSocket handshake done, new connection opened");
 
         // Add this client to our list
-        WebServer::getI().AddWebSocketClient(httpd_req_to_sockfd(req));
+        WebServer::getI().addWebSocketClient(httpd_req_to_sockfd(req));
         return ESP_OK;
     }
 
@@ -266,7 +266,7 @@ esp_err_t WebServer::WebSocketHandler(httpd_req_t* req)
         if (HTTPD_WS_TYPE_CLOSE == ws_pkt.type)
         {
             ESP_LOGI(TAG, "WebSocket connection closed");
-            WebServer::getI().RemoveWebSocketClient(httpd_req_to_sockfd(req));
+            WebServer::getI().removeWebSocketClient(httpd_req_to_sockfd(req));
             free(buf);
             return ESP_OK;
         }
@@ -280,7 +280,7 @@ esp_err_t WebServer::WebSocketHandler(httpd_req_t* req)
             if (0 == strncmp((char*)ws_pkt.payload, "get_status", 10))
             {
                 // Get status and send it back
-                char* status_json = WebServer::getI().GetStatus();
+                char* status_json = WebServer::getI().getStatus();
                 if (nullptr != status_json)
                 {
                     httpd_ws_frame_t ws_resp;
@@ -302,7 +302,7 @@ esp_err_t WebServer::WebSocketHandler(httpd_req_t* req)
 }
 
 // Add WebSocket client
-void WebServer::AddWebSocketClient(int fd)
+void WebServer::addWebSocketClient(int fd)
 {
     xSemaphoreTake(m_websocket_mutex, portMAX_DELAY);
     m_websocket_clients.push_back(fd);
@@ -311,7 +311,7 @@ void WebServer::AddWebSocketClient(int fd)
 }
 
 // Remove WebSocket client
-void WebServer::RemoveWebSocketClient(int fd)
+void WebServer::removeWebSocketClient(int fd)
 {
     xSemaphoreTake(m_websocket_mutex, portMAX_DELAY);
     auto it = std::find(m_websocket_clients.begin(), m_websocket_clients.end(), fd);
