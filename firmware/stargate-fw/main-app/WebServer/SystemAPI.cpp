@@ -277,7 +277,7 @@ esp_err_t WebServer::webAPIPostHandler(httpd_req_t* req)
     return err;
 }
 
-char* WebServer::GetStatus()
+char* WebServer::getStatus()
 {
     cJSON* root = nullptr;
     {
@@ -324,7 +324,7 @@ char* WebServer::GetStatus()
     return nullptr;
 }
 
-char* WebServer::GetSysInfo()
+char* WebServer::getSysInfo()
 {
     cJSON* root = nullptr;
     {
@@ -354,7 +354,7 @@ char* WebServer::GetSysInfo()
         cJSON* entryJSON3 = cJSON_CreateObject();
         cJSON_AddItemToObject(entryJSON3, "name", cJSON_CreateString("SHA256"));
         char elf_sha256[sizeof(esp_app_desc.app_elf_sha256)*2 + 1] = {0,};
-        ToHexString(elf_sha256, esp_app_desc.app_elf_sha256, sizeof(esp_app_desc.app_elf_sha256));
+        toHexString(elf_sha256, esp_app_desc.app_elf_sha256, sizeof(esp_app_desc.app_elf_sha256));
         cJSON_AddItemToObject(entryJSON3, "value", cJSON_CreateString(elf_sha256));
         cJSON_AddItemToArray(entries, entryJSON3);
 
@@ -455,7 +455,7 @@ char* WebServer::GetSysInfo()
     return nullptr;
 }
 
-char* WebServer::GetAllSoundLists()
+char* WebServer::getAllSoundLists()
 {
     cJSON* root = nullptr;
     {
@@ -485,7 +485,7 @@ char* WebServer::GetAllSoundLists()
     return nullptr;
 }
 
-void WebServer::ToHexString(char dst_hex_string[], const uint8_t* data, uint8_t len)
+void WebServer::toHexString(char dst_hex_string[], const uint8_t* data, uint8_t len)
 {
     for (uint32_t i = 0; i < len; i++)
         sprintf(dst_hex_string + (i * 2), "%02X", data[i]);
