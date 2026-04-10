@@ -2,8 +2,8 @@
 
 A fully functional Stargate replica controller based on ESP32, designed to replace Raspberry Pi-based solutions with a more cost-effective and integrated approach.
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.3.1-blue)
+[![CI](https://github.com/pinkymaxou/stargate-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/pinkymaxou/stargate-v2/actions/workflows/ci.yml)
+![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v6.1--dev-blue)
 ![License](https://img.shields.io/badge/license-See%20doc%2Fcopyright.md-lightgrey)
 
 ## Overview
