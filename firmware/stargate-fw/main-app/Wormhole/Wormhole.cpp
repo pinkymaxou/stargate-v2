@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include "Wormhole.hpp"
 #include "../Settings.hpp"
 #include "misc-formula.h"
@@ -50,53 +51,106 @@ SGResult Wormhole::runTicks()
     const float min_f = 0.30f;
     const float max_f = 1.00f;
 
-    if (!m_is_run_initialized)
+    if (EType::Blackhole == m_wormhole_type)
     {
-        // Random initialization
+        static constexpr float TWO_PI = 6.2832f;
+
+        m_bh_phase += 0.18f;
+        if (m_bh_phase > TWO_PI)
+            m_bh_phase -= TWO_PI;
+
+        // Ring3 — event horizon: near-black, barely perceptible deep violet pulse
+        {
+            const float pulse = 0.5f + 0.5f * sinf(m_bh_phase * 0.2f);
+            const uint8_t v = (uint8_t)(5.0f * pulse);
+            for (int j = 0; j < RING3_COUNT; j++)
+                m_hal->setWHPixel(m_ring3_one_based[j]-1, (uint8_t)(v * 0.3f), 0, v);
+        }
+
+        // Ring2 — photon ring: dominant feature, warm amber-orange, fast spin
+        // The bright arc sweeps around simulating gravitational lensing
+        {
+            for (int j = 0; j < RING2_COUNT; j++)
+            {
+                const float t = (float)j / (float)RING2_COUNT;
+                const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 3.5f);
+                const uint8_t r = (uint8_t)(m_max_brightness * (0.55f + 0.45f * hot));
+                const uint8_t g = (uint8_t)(r * (0.28f + 0.12f * hot));
+                m_hal->setWHPixel(m_ring2_one_based[j]-1, r, g, 0);
+            }
+        }
+
+        // Ring1 — accretion disk: orange-red, Doppler-shifted spin
+        // Hot side brighter and more orange, cool side dimmer and redder
+        {
+            for (int j = 0; j < RING1_COUNT; j++)
+            {
+                const float t = (float)j / (float)RING1_COUNT;
+                const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 1.5f);
+                const uint8_t r = (uint8_t)(m_max_brightness * (0.35f + 0.30f * hot));
+                const uint8_t g = (uint8_t)(r * 0.18f * hot);
+                m_hal->setWHPixel(m_ring1_one_based[j]-1, r, g, 0);
+            }
+        }
+
+        // Ring0 — outer nebula glow: very dim red, slow drift
+        {
+            for (int j = 0; j < RING0_COUNT; j++)
+            {
+                const float t = (float)j / (float)RING0_COUNT;
+                const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 0.6f);
+                const uint8_t r = (uint8_t)(m_max_brightness * 0.08f * (0.5f + 0.5f * hot));
+                m_hal->setWHPixel(m_ring0_one_based[j]-1, r, (uint8_t)(r * 0.06f), 0);
+            }
+        }
+    }
+    else
+    {
+        if (!m_is_run_initialized)
+        {
+            for(int i = 0; i < m_hal->getWHPixelCount(); i++)
+            {
+                SLedEffect* led_effect = &m_led_effects[i];
+                led_effect->one = min_f + (((esp_random() % 100) * 0.01f) * (max_f - min_f));
+                led_effect->is_up = 0 != (esp_random() % 2);
+            }
+            m_is_run_initialized = true;
+        }
+
         for(int i = 0; i < m_hal->getWHPixelCount(); i++)
         {
             SLedEffect* led_effect = &m_led_effects[i];
-            led_effect->one = min_f + (((esp_random() % 100) * 0.01f) * (max_f - min_f));
-            led_effect->is_up = 0 != (esp_random() % 2);
-        }
-        m_is_run_initialized = true;
-    }
 
-    for(int i = 0; i < m_hal->getWHPixelCount(); i++) 
-    {
-        SLedEffect* led_effect = &m_led_effects[i];
+            const float inc = 0.0005f * (esp_random() % 100);
 
-        const float inc = /*0.0025f +*/ ( 0.0005f * (esp_random() % 100) );
+            led_effect->one += inc * (led_effect->is_up ? 1.0f : -1.0f);
 
-        led_effect->one += inc * (led_effect->is_up ? 1.0f : -1.0f);
+            if (led_effect->one >= max_f)
+            {
+                led_effect->one = max_f;
+                led_effect->is_up = false;
+            }
+            else if (led_effect->one <= min_f)
+            {
+                led_effect->one = min_f;
+                led_effect->is_up = true;
+            }
 
-        if (led_effect->one >= max_f)
-        {
-            led_effect->one = max_f;
-            led_effect->is_up = false;
-        }
-        else if (led_effect->one <= min_f)
-        {
-            led_effect->one = min_f;
-            led_effect->is_up = true;
-        }
+            float corr_value = MISCFA_LinearizeLEDOutput(led_effect->one);
 
-        // Linearize the output (from human perception POV)
-        float corr_value = MISCFA_LinearizeLEDOutput(led_effect->one);
+            constexpr float ring_corr_values[(int)Wormhole::ERing::Count] = { 0.1f, 0.6f, 0.9f, 1.0f };
+            corr_value *= ring_corr_values[(int)getRing(i)];
 
-        // Make the outer ring glowing less
-        constexpr float ring_corr_values[(int)Wormhole::ERing::Count] = { 0.1f, 0.6f, 0.9f, 1.0f };
-        corr_value *= ring_corr_values[(int)getRing(i)];
+            const uint8_t pwm = (uint8_t)(corr_value * m_max_brightness);
 
-        const uint8_t pwm = (uint8_t)(corr_value*m_max_brightness);
-
-        if (EType::NormalSG1 == m_wormhole_type)
-        {
-            m_hal->setWHPixel(i, MISCMACRO_MAX(pwm, 16), MISCMACRO_MAX(pwm, 16), MISCMACRO_MIN(16+pwm, m_max_brightness-16));
-        }
-        else if (EType::NormalSGU == m_wormhole_type)
-        {
-            m_hal->setWHPixel(i, pwm, pwm, pwm);
+            if (EType::NormalSG1 == m_wormhole_type)
+            {
+                m_hal->setWHPixel(i, MISCMACRO_MAX(pwm, 16), MISCMACRO_MAX(pwm, 16), MISCMACRO_MIN(16+pwm, m_max_brightness-16));
+            }
+            else if (EType::NormalSGU == m_wormhole_type)
+            {
+                m_hal->setWHPixel(i, pwm, pwm, pwm);
+            }
         }
     }
 

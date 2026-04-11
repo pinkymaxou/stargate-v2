@@ -12,7 +12,7 @@ class Wormhole
     {
         NormalSGU = 0,
         NormalSG1 = 1,
-        //Blackhole = 2,
+        Blackhole = 2,
         //GlitchSGU = 3,
 
         Count
@@ -62,6 +62,7 @@ class Wormhole
 
     bool m_is_run_initialized = false;
     uint32_t m_max_brightness = 0;
+    float m_bh_phase = 0.0f;
 
     static constexpr uint32_t LEDEFFECT_COUNT = 48;
     SLedEffect m_led_effects[LEDEFFECT_COUNT];
@@ -101,7 +102,7 @@ class Wormhole
     {
         [(int)EType::NormalSGU] = "Normal SGU",
         [(int)EType::NormalSG1] = "Normal SG1",
-        //[(int)EType::Blackhole] = "Blackhole",
+        [(int)EType::Blackhole] = "Blackhole",
         //[(int)EType::GlitchSGU] = "Glitch SGU",
     };
     static_assert((int)EType::Count == sizeof(m_texts)/sizeof(m_texts[0]), "Text missmatch");
