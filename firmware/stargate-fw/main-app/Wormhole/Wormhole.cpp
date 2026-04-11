@@ -59,48 +59,47 @@ SGResult Wormhole::runTicks()
         if (m_bh_phase > TWO_PI)
             m_bh_phase -= TWO_PI;
 
-        // Ring3 — event horizon: near-black, barely perceptible deep violet pulse
+        // Ring3 — event horizon: near-black, faint deep-violet pulse
         {
             const float pulse = 0.5f + 0.5f * sinf(m_bh_phase * 0.2f);
-            const uint8_t v = (uint8_t)(5.0f * pulse);
+            const uint8_t v = (uint8_t)(6.0f * pulse);
             for (int j = 0; j < RING3_COUNT; j++)
-                m_hal->setWHPixel(m_ring3_one_based[j]-1, (uint8_t)(v * 0.3f), 0, v);
+                m_hal->setWHPixel(m_ring3_one_based[j]-1, (uint8_t)(v * 0.45f), 0, v);
         }
 
-        // Ring2 — photon ring: dominant feature, warm amber-orange, fast spin
-        // The bright arc sweeps around simulating gravitational lensing
+        // Ring2 — photon ring: dominant bright violet-purple arc, fast spin
         {
             for (int j = 0; j < RING2_COUNT; j++)
             {
                 const float t = (float)j / (float)RING2_COUNT;
                 const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 3.5f);
-                const uint8_t r = (uint8_t)(m_max_brightness * (0.55f + 0.45f * hot));
-                const uint8_t g = (uint8_t)(r * (0.28f + 0.12f * hot));
-                m_hal->setWHPixel(m_ring2_one_based[j]-1, r, g, 0);
+                const uint8_t b = (uint8_t)(m_max_brightness * (0.55f + 0.45f * hot));
+                const uint8_t r = (uint8_t)(b * (0.50f + 0.15f * hot));
+                m_hal->setWHPixel(m_ring2_one_based[j]-1, r, 0, b);
             }
         }
 
-        // Ring1 — accretion disk: orange-red, Doppler-shifted spin
-        // Hot side brighter and more orange, cool side dimmer and redder
+        // Ring1 — accretion disk: magenta-purple, medium spin
         {
             for (int j = 0; j < RING1_COUNT; j++)
             {
                 const float t = (float)j / (float)RING1_COUNT;
                 const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 1.5f);
-                const uint8_t r = (uint8_t)(m_max_brightness * (0.35f + 0.30f * hot));
-                const uint8_t g = (uint8_t)(r * 0.18f * hot);
-                m_hal->setWHPixel(m_ring1_one_based[j]-1, r, g, 0);
+                const uint8_t base = (uint8_t)(m_max_brightness * (0.35f + 0.30f * hot));
+                const uint8_t r = (uint8_t)(base * (0.80f + 0.20f * hot));
+                const uint8_t b = (uint8_t)(base * 0.70f);
+                m_hal->setWHPixel(m_ring1_one_based[j]-1, r, 0, b);
             }
         }
 
-        // Ring0 — outer nebula glow: very dim red, slow drift
+        // Ring0 — outer nebula glow: very dim purple, slow drift
         {
             for (int j = 0; j < RING0_COUNT; j++)
             {
                 const float t = (float)j / (float)RING0_COUNT;
                 const float hot = 0.5f + 0.5f * sinf(t * TWO_PI - m_bh_phase * 0.6f);
-                const uint8_t r = (uint8_t)(m_max_brightness * 0.08f * (0.5f + 0.5f * hot));
-                m_hal->setWHPixel(m_ring0_one_based[j]-1, r, (uint8_t)(r * 0.06f), 0);
+                const uint8_t b = (uint8_t)(m_max_brightness * 0.08f * (0.5f + 0.5f * hot));
+                m_hal->setWHPixel(m_ring0_one_based[j]-1, (uint8_t)(b * 0.55f), 0, b);
             }
         }
     }
