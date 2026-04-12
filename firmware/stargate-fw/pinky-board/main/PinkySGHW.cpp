@@ -302,7 +302,14 @@ bool PinkySGHW::refreshWHPixels()
 {
     if (lockMutex())
     {
-        const esp_err_t ret = led_strip_refresh(m_led_strip);
+        esp_err_t ret = led_strip_refresh(m_led_strip);
+        if (ESP_OK != ret)
+        {
+            // RMT channel may still be transmitting the previous frame (e.g. delayed by a
+            // WiFi interrupt). Wait one WS2812 frame time and retry once before giving up.
+            vTaskDelay(pdMS_TO_TICKS(2));
+            ret = led_strip_refresh(m_led_strip);
+        }
         unlockMutex();
         return ESP_OK == ret;
     }
