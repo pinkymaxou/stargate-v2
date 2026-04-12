@@ -25,9 +25,9 @@ class WebServer
     void operator=(WebServer const&) = delete;
 
     public:
-    void Init(SGHW_HAL* sghw_hal);
+    void init(SGHW_HAL* sghw_hal);
 
-    void Start();
+    void start();
 
     static WebServer& getI()
     {
@@ -35,30 +35,30 @@ class WebServer
         return instance;
     }
     private:
-    static esp_err_t file_get_handler(httpd_req_t* req);
-    static esp_err_t OTAUploadPostHandler(httpd_req_t* req);
+    static esp_err_t fileGetHandler(httpd_req_t* req);
+    static esp_err_t otaUploadPostHandler(httpd_req_t* req);
 
-    static esp_err_t WebAPIGetHandler(httpd_req_t* req);
-    static esp_err_t WebAPIPostHandler(httpd_req_t* req);
-    static esp_err_t GateControlAPIPostHandler(httpd_req_t* req);
-    static esp_err_t WebSocketHandler(httpd_req_t* req);
+    static esp_err_t webAPIGetHandler(httpd_req_t* req);
+    static esp_err_t webAPIPostHandler(httpd_req_t* req);
+    static esp_err_t gateControlAPIPostHandler(httpd_req_t* req);
+    static esp_err_t webSocketHandler(httpd_req_t* req);
 
     // Get API
-    char* GetStatus();
-    char* GetSysInfo();
-    char* GetAllSoundLists();
+    char* getStatus();
+    char* getSysInfo();
+    char* getAllSoundLists();
 
-    char* GetGalaxyInfoJSON(GateGalaxy gate_galaxy);
+    char* getGalaxyInfoJSON(GateGalaxy gate_galaxy);
 
-    static void ToHexString(char dst_hex_string[], const uint8_t* data, uint8_t len);
+    static void toHexString(char dst_hex_string[], const uint8_t* data, uint8_t len);
 
-    static esp_err_t set_content_type_from_file(httpd_req_t* req, const char* filename);
+    static esp_err_t setContentTypeFromFile(httpd_req_t* req, const char* filename);
 
-    static const EF_SFile* GetFile(const char* filename);
+    static const EF_SFile* getFile(const char* filename);
 
     // WebSocket management
-    void AddWebSocketClient(int fd);
-    void RemoveWebSocketClient(int fd);
+    void addWebSocketClient(int fd);
+    void removeWebSocketClient(int fd);
 
     // Variable
     httpd_handle_t m_server;

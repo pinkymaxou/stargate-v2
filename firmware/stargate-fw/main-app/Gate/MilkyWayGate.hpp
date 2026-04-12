@@ -9,22 +9,22 @@ class MilkyWayGate : public BaseGate
     MilkyWayGate();
     static const int32_t m_symbol_count = 39;
 
-    inline const GateSymbol& GetSymbol(uint8_t symbol_num) const override
+    inline const GateSymbol& getSymbol(uint8_t symbol_num) const override
     {
         if (1 > symbol_num || m_symbol_count < symbol_num)
             return BaseGate::InvalidSymbol;
         return m_symbols[symbol_num-1];
     }
 
-    inline int32_t GetSymbolCount() const override { return m_symbol_count; };
+    inline int32_t getSymbolCount() const override { return m_symbol_count; };
 
-    inline const GateAddress& GetAddress(uint32_t index) const override
+    inline const GateAddress& getAddress(uint32_t index) const override
     {
-        if (index >= GetAddressCount())
+        if (index >= getAddressCount())
             return BaseGate::InvalidGateAddress;
         return m_gateAddresses[index];
     }
-    inline int32_t GetAddressCount() const override { return sizeof(m_gateAddresses)/sizeof(m_gateAddresses[0]); }
+    inline int32_t getAddressCount() const override { return sizeof(m_gateAddresses)/sizeof(m_gateAddresses[0]); }
 
     // TODO: Add them to the "Thanks" section later.
     // https://www.rdanderson.com/stargate/glyphs/index.htm

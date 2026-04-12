@@ -16,21 +16,21 @@ HttpClient::HttpClient()
     m_fanGate_mutex = xSemaphoreCreateMutex();
 }
 
-void HttpClient::Init()
+void HttpClient::init()
 {
 
 }
 
-void HttpClient::Start()
+void HttpClient::start()
 {
     return; // Disable for now, as the API is not yet ready and we don't want to spam the server with failed requests.
-    if (pdPASS != xTaskCreatePinnedToCore(TaskRunning, "HttpClient", FWCONFIG_HTTPCLIENT_STACKSIZE, (void*)this, FWCONFIG_HTTPCLIENT_PRIORITY_DEFAULT, &m_task_http_client_handle, FWCONFIG_HTTPCLIENT_COREID))
+    if (pdPASS != xTaskCreatePinnedToCore(taskRunning, "HttpClient", FWCONFIG_HTTPCLIENT_STACKSIZE, (void*)this, FWCONFIG_HTTPCLIENT_PRIORITY_DEFAULT, &m_task_http_client_handle, FWCONFIG_HTTPCLIENT_COREID))
     {
         ESP_ERROR_CHECK(ESP_FAIL);
     }
 }
 
-std::shared_ptr<char[]> HttpClient::GetFanGateListString()
+std::shared_ptr<char[]> HttpClient::getFanGateListString()
 {
     std::shared_ptr<char[]> result;
     if (pdTRUE == xSemaphoreTake(m_fanGate_mutex, portMAX_DELAY))
@@ -41,7 +41,7 @@ std::shared_ptr<char[]> HttpClient::GetFanGateListString()
     return result;
 }
 
-void HttpClient::TaskRunning(void* arg)
+void HttpClient::taskRunning(void* arg)
 {
     HttpClient* http_client = (HttpClient*)arg;
 
@@ -55,7 +55,7 @@ void HttpClient::TaskRunning(void* arg)
 
         do {
             // Check if Wi-Fi is connected before attempting HTTP request
-            if (WifiMgr::EState::Connected != WifiMgr::getI().GetWifiSTAState())
+            if (WifiMgr::EState::Connected != WifiMgr::getI().getWifiSTAState())
             {
                 ESP_LOGW(TAG, "Wi-Fi not connected, skipping HTTP request");
                 error = true;

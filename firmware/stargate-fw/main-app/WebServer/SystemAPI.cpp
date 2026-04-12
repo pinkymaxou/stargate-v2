@@ -21,7 +21,7 @@
 /*! @brief this variable is set by linker script, don't rename it. It contains app image informations. */
 extern const esp_app_desc_t esp_app_desc;
 
-esp_err_t WebServer::WebAPIGetHandler(httpd_req_t* req)
+esp_err_t WebServer::webAPIGetHandler(httpd_req_t* req)
 {
     esp_err_t err = ESP_OK;
     char* export_json = nullptr;
@@ -29,23 +29,23 @@ esp_err_t WebServer::WebAPIGetHandler(httpd_req_t* req)
 
     if (0 == strcmp(req->uri, APIURL_GETSTATUS_URI))
     {
-        export_json = getI().GetStatus();
+        export_json = getI().getStatus();
     }
     else if (0 == strcmp(req->uri, APIURL_GETSYSINFO_URI))
     {
-        export_json = getI().GetSysInfo();
+        export_json = getI().getSysInfo();
     }
     else if (0 == strcmp(req->uri, APIURL_GETSOUNDLIST_URI))
     {
-        export_json = getI().GetAllSoundLists();
+        export_json = getI().getAllSoundLists();
     }
     else if (0 == strcmp(req->uri, APIURL_GETPOST_SETTINGSJSON_URI))
     {
-        export_json = Settings::getI().ExportJSON();
+        export_json = Settings::getI().exportJSON();
     }
     else if (0 == strcmp(req->uri, APIURL_GETFANGATELIST_MILKYWAY_URI))
     {
-        std::shared_ptr<char[]> fangate_ptr = HttpClient::getI().GetFanGateListString();
+        std::shared_ptr<char[]> fangate_ptr = HttpClient::getI().getFanGateListString();
         export_json = strdup(nullptr != fangate_ptr ? fangate_ptr.get() : "[]");
     }
     else if (0 == strcmp(req->uri, APIURL_GETFREERTOSDBGINFO_URI))
@@ -56,15 +56,15 @@ esp_err_t WebServer::WebAPIGetHandler(httpd_req_t* req)
     }
     else if (0 == strcmp(req->uri, APIURL_GALAXY_GETINFO_MILKYWAY_URI))
     {
-        export_json = getI().GetGalaxyInfoJSON(GateGalaxy::MilkyWay);
+        export_json = getI().getGalaxyInfoJSON(GateGalaxy::MilkyWay);
     }
     else if (0 == strcmp(req->uri, APIURL_GALAXY_GETINFO_PEGASUS_URI))
     {
-        export_json = getI().GetGalaxyInfoJSON(GateGalaxy::Pegasus);
+        export_json = getI().getGalaxyInfoJSON(GateGalaxy::Pegasus);
     }
     else if (0 == strcmp(req->uri, APIURL_GALAXY_GETINFO_UNIVERSE_URI))
     {
-        export_json = getI().GetGalaxyInfoJSON(GateGalaxy::Universe);
+        export_json = getI().getGalaxyInfoJSON(GateGalaxy::Universe);
     }
     else
     {
@@ -101,7 +101,7 @@ esp_err_t WebServer::WebAPIGetHandler(httpd_req_t* req)
     return err;
 }
 
-esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
+esp_err_t WebServer::webAPIPostHandler(httpd_req_t* req)
 {
     esp_err_t err = ESP_OK;
     cJSON* root = nullptr;
@@ -126,7 +126,7 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
     {
         // ==============================================
         // Import the JSON setting file
-        if (!Settings::getI().ImportJSON((const char*)ws.m_buffers))
+        if (!Settings::getI().importJSON((const char*)ws.m_buffers))
         {
             ESP_LOGE(TAG, "Unable to import JSON");
             httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Unknown request");
@@ -141,11 +141,11 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
         // Gate control
         if (0 == strcmp(req->uri, APIURL_POSTCONTROL_AUTOHOME_URI))
         {
-            GateControl::getI().QueueAutoHome();
+            GateControl::getI().queueAutoHome();
         }
         else if (0 == strcmp(req->uri, APIURL_POSTCONTROL_AUTOCALIBRATE_URI))
         {
-            GateControl::getI().QueueAutoCalibrate();
+            GateControl::getI().queueAutoCalibrate();
         }
         else if (0 == strcmp(req->uri, APIURL_POSTCONTROL_DIALADDRESS_URI))
         {
@@ -173,11 +173,11 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
                 symbol_count++;
             }
             GateAddress ga { symbols, symbol_count };
-            GateControl::getI().QueueDialAddress(ga);
+            GateControl::getI().queueDialAddress(ga);
         }
         else if (0 == strcmp(req->uri, APIURL_POSTCONTROL_ABORT_URI))
         {
-            GateControl::getI().AbortAction();
+            GateControl::getI().abortAction();
         }
         // Test control
         else if (0 == strcmp(req->uri, APIURL_POSTCONTROL_TESTRAMPLIGHT_URI))
@@ -189,7 +189,7 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
             {
                 goto ERROR;
             }
-            ws.m_sghw_hal->SetRampLight(item_value->valuedouble);
+            ws.m_sghw_hal->setRampLight(item_value->valuedouble);
         }
         else if (0 == strcmp(req->uri, APIURL_POSTCONTROL_TESTSERVO_URI))
         {
@@ -200,7 +200,7 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
             {
                 goto ERROR;
             }
-            ws.m_sghw_hal->SetServo(item_value->valuedouble);
+            ws.m_sghw_hal->setServo(item_value->valuedouble);
         }
         // Sounds
         else if (0 == strcmp(req->uri, APIURL_PLAYSOUND_URI))
@@ -211,7 +211,7 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
             {
                 goto ERROR;
             }
-            if (SGResult::OK != SoundFX::getI().PlaySound((SoundFX::FileID)(item_anim->valueint), false))
+            if (SGResult::OK != SoundFX::getI().playSound((SoundFX::FileID)(item_anim->valueint), false))
             {
                 goto ERROR;
             }
@@ -227,17 +227,17 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
             }
             // TODO: Implement the wormhole.
             ESP_LOGI(TAG, "Implement wormhole, id: %d", item_anim->valueint);
-            GateControl::getI().QueueManualWormhole( (Wormhole::EType)item_anim->valueint );
+            GateControl::getI().queueManualWormhole( (Wormhole::EType)item_anim->valueint );
         }
         else if (0 == strcmp(req->uri, APIURL_STOPSOUND_URI))
         {
-            SoundFX::getI().StopSound();
+            SoundFX::getI().stopSound();
         }
         // ==============================================
         // Ring control
         else if (0 == strcmp(req->uri, APIURL_POSTRINGCONTROL_POWEROFF_URI))
         {
-            RingBLEClient::getI().SendPowerOff();
+            RingBLEClient::getI().sendPowerOff();
         }
         else if (0 == strcmp(req->uri, APIURL_POSTRINGCONTROL_TESTANIMATE_URI))
         {
@@ -248,11 +248,11 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
             {
                 goto ERROR;
             }
-            RingBLEClient::getI().SendGateAnimation((SGUCommNS::EChevronAnimation)item_anim->valueint);
+            RingBLEClient::getI().sendGateAnimation((SGUCommNS::EChevronAnimation)item_anim->valueint);
         }
         else if (0 == strcmp(req->uri, APIURL_POSTRINGCONTROL_GOTOFACTORY_URI))
         {
-            RingBLEClient::getI().SendGotoFactory();
+            RingBLEClient::getI().sendGotoFactory();
         }
         else
         {
@@ -277,7 +277,7 @@ esp_err_t WebServer::WebAPIPostHandler(httpd_req_t* req)
     return err;
 }
 
-char* WebServer::GetStatus()
+char* WebServer::getStatus()
 {
     cJSON* root = nullptr;
     {
@@ -290,7 +290,7 @@ char* WebServer::GetStatus()
         cJSON* status_entry = cJSON_CreateObject();
 
         GateControl::UIState state;
-        GateControl::getI().GetState(state);
+        GateControl::getI().getState(state);
 
         cJSON_AddItemToObject(status_entry, "text", cJSON_CreateString(state.status_text));
         cJSON_AddItemToObject(status_entry, "cancel_request", cJSON_CreateBool(state.is_cancel_requested));
@@ -300,7 +300,7 @@ char* WebServer::GetStatus()
 
         cJSON* ring_entry = cJSON_CreateObject();
         RingBLEClient& ring_comm = RingBLEClient::getI();
-        cJSON_AddItemToObject(ring_entry, "is_connected", cJSON_CreateBool(ring_comm.GetIsConnected()));
+        cJSON_AddItemToObject(ring_entry, "is_connected", cJSON_CreateBool(ring_comm.getIsConnected()));
         cJSON_AddItemToObject(status_entry, "ring", ring_entry);
 
         time_t now = 0;
@@ -324,7 +324,7 @@ char* WebServer::GetStatus()
     return nullptr;
 }
 
-char* WebServer::GetSysInfo()
+char* WebServer::getSysInfo()
 {
     cJSON* root = nullptr;
     {
@@ -354,7 +354,7 @@ char* WebServer::GetSysInfo()
         cJSON* entryJSON3 = cJSON_CreateObject();
         cJSON_AddItemToObject(entryJSON3, "name", cJSON_CreateString("SHA256"));
         char elf_sha256[sizeof(esp_app_desc.app_elf_sha256)*2 + 1] = {0,};
-        ToHexString(elf_sha256, esp_app_desc.app_elf_sha256, sizeof(esp_app_desc.app_elf_sha256));
+        toHexString(elf_sha256, esp_app_desc.app_elf_sha256, sizeof(esp_app_desc.app_elf_sha256));
         cJSON_AddItemToObject(entryJSON3, "value", cJSON_CreateString(elf_sha256));
         cJSON_AddItemToArray(entries, entryJSON3);
 
@@ -386,14 +386,14 @@ char* WebServer::GetSysInfo()
         cJSON_AddItemToObject(entryJSON9, "name", cJSON_CreateString("WiFi (STA IPv4)"));
         esp_netif_ip_info_t wifi_ip_sta;
         memset(&wifi_ip_sta, 0, sizeof(wifi_ip_sta));
-        WifiMgr::getI().GetWiFiSTAIP(wifi_ip_sta);
+        WifiMgr::getI().getWiFiSTAIP(wifi_ip_sta);
         sprintf(buff, IPSTR, IP2STR(&wifi_ip_sta.ip));
         cJSON_AddItemToObject(entryJSON9, "value", cJSON_CreateString(buff));
         cJSON_AddItemToArray(entries, entryJSON9);
 
         esp_ip6_addr_t if_ip6[CONFIG_LWIP_IPV6_NUM_ADDRESSES];
         memset(&if_ip6[0], 0, sizeof(if_ip6));
-        const int32_t ipv6_count = WifiMgr::getI().GetWiFiSTAIPv6(if_ip6);
+        const int32_t ipv6_count = WifiMgr::getI().getWiFiSTAIPv6(if_ip6);
         for(int i = 0; i < MISCMACRO_MIN(ipv6_count, 2); i++)
         {
             char ipv6_string[45+1] = {0,};
@@ -419,7 +419,7 @@ char* WebServer::GetSysInfo()
         cJSON_AddItemToObject(entryJSON10, "name", cJSON_CreateString("WiFi (Soft-AP)"));
         esp_netif_ip_info_t wifi_ip_soft_ap;
         memset(&wifi_ip_soft_ap, 0, sizeof(wifi_ip_soft_ap));
-        WifiMgr::getI().GetWiFiSoftAPIP(wifi_ip_soft_ap);
+        WifiMgr::getI().getWiFiSoftAPIP(wifi_ip_soft_ap);
         sprintf(buff, IPSTR, IP2STR(&wifi_ip_soft_ap.ip));
         cJSON_AddItemToObject(entryJSON10, "value", cJSON_CreateString(buff));
         cJSON_AddItemToArray(entries, entryJSON10);
@@ -455,7 +455,7 @@ char* WebServer::GetSysInfo()
     return nullptr;
 }
 
-char* WebServer::GetAllSoundLists()
+char* WebServer::getAllSoundLists()
 {
     cJSON* root = nullptr;
     {
@@ -466,9 +466,9 @@ char* WebServer::GetAllSoundLists()
         }
 
         cJSON* entries = cJSON_AddArrayToObject(root, "files");
-        for(int32_t i = 0; i < SoundFX::getI().GetFileCount(); i++)
+        for(int32_t i = 0; i < SoundFX::getI().getFileCount(); i++)
         {
-            const SoundFX::SoundFile* sound_file = SoundFX::getI().GetFile((SoundFX::FileID)i);
+            const SoundFX::SoundFile* sound_file = SoundFX::getI().getFile((SoundFX::FileID)i);
 
             cJSON* new_file = cJSON_CreateObject();
             cJSON_AddItemToObject(new_file, "id", cJSON_CreateNumber(i));
@@ -485,7 +485,7 @@ char* WebServer::GetAllSoundLists()
     return nullptr;
 }
 
-void WebServer::ToHexString(char dst_hex_string[], const uint8_t* data, uint8_t len)
+void WebServer::toHexString(char dst_hex_string[], const uint8_t* data, uint8_t len)
 {
     for (uint32_t i = 0; i < len; i++)
         sprintf(dst_hex_string + (i * 2), "%02X", data[i]);

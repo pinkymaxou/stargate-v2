@@ -35,49 +35,49 @@ class PinkySGHW : public SGHW_HAL
     public:
     PinkySGHW();
 
-    void Init() override;
+    void init() override;
 
-    void SetChevronLight(EChevron chevron, bool state) override;
+    void setChevronLight(EChevron chevron, bool state) override;
 
     // Ramp light
-    void SetRampLight(double perc) override;
+    void setRampLight(double perc) override;
 
-    void PowerUpStepper() override;
-    void StepStepperCW() override;
-    void StepStepperCCW() override;
-    void PowerDownStepper() override;
+    void powerUpStepper() override;
+    void stepStepperCW() override;
+    void stepStepperCCW() override;
+    void powerDownStepper() override;
 
-    void PowerUpServo() override;
-    void SetServo(double position) override;
-    void PowerDownServo() override;
+    void powerUpServo() override;
+    void setServo(double position) override;
+    void powerDownServo() override;
 
     // Wormhole related
-    int32_t GetWHPixelCount() override;
-    void SetWHPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) override;
-    void ClearAllWHPixels() override;
-    bool RefreshWHPixels() override;
+    int32_t getWHPixelCount() override;
+    void setWHPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) override;
+    void clearAllWHPixels() override;
+    bool refreshWHPixels() override;
 
-    void SetSanityLED(bool state);
+    void setSanityLED(bool state);
 
-    bool GetIsHomeSensorActive() override;
+    bool getIsHomeSensorActive() override;
 
-    void SendMp3PlayerCMD(const char* cmd) override;
+    void sendMp3PlayerCMD(const char* cmd) override;
 
     // Stepper
-    bool SpinUntil(ESpinDirection spin_direction, ETransition transition, uint32_t timeout_ms, int32_t* ref_tick_count, const volatile bool* cancel_flag = nullptr) override;
-    bool MoveStepperTo(int32_t ticks, uint32_t timeout_ms) override;
+    bool spinUntil(ESpinDirection spin_direction, ETransition transition, uint32_t timeout_ms, int32_t* ref_tick_count, const volatile bool* cancel_flag = nullptr) override;
+    bool moveStepperTo(int32_t ticks, uint32_t timeout_ms) override;
 
     private:
-    bool LockMutex() { return (pdTRUE == xSemaphoreTake( m_mutex_handle, ( TickType_t ) pdMS_TO_TICKS(100) )); }
-    void UnlockMutex() { xSemaphoreGive( m_mutex_handle ); }
+    bool lockMutex() { return (pdTRUE == xSemaphoreTake( m_mutex_handle, ( TickType_t ) pdMS_TO_TICKS(100) )); }
+    void unlockMutex() { xSemaphoreGive( m_mutex_handle ); }
 
-    static void tmr_signal_callback(void* arg);
+    static void tmrSignalCallback(void* arg);
 
     private:
     Stepper m_stepper;
     ServoControl m_servo;
 
-    led_strip_handle_t led_strip;
+    led_strip_handle_t m_led_strip;
 
     double m_last_servo_position;
 

@@ -14,9 +14,9 @@ class App
     public:
     App() = default;
 
-    void Init(Config* config);
+    void init(Config* config);
 
-    void LoopTick();
+    void loopTick();
 
     private:
     Config* m_config;

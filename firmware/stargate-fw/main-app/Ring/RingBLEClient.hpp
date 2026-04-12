@@ -47,60 +47,60 @@ public:
     /**
      * @brief Initialize the BLE client
      */
-    void Init();
+    void init();
 
     /**
      * @brief Start the BLE client task (scans and connects)
      */
-    void Start();
+    void start();
 
     /**
      * @brief Check if connected to the ring
      */
-    bool GetIsConnected();
+    bool getIsConnected();
 
     /**
      * @brief Send heartbeat action (action 0)
      */
-    void SendHeartbeat();
+    void sendHeartbeat();
 
     /**
      * @brief Send animation action (action 1)
      * @param animation The animation to execute
      */
-    void SendAnimation(SGUCommNS::EChevronAnimation animation);
+    void sendAnimation(SGUCommNS::EChevronAnimation animation);
 
     /**
      * @brief Send set symbols action (action 2)
      * @param symbol_bits 48-bit pattern (6 bytes), 1 bit per symbol
      */
-    void SendSetSymbols(const uint8_t symbol_bits[6]);
+    void sendSetSymbols(const uint8_t symbol_bits[6]);
 
     /**
      * @brief Send power off action (action 3)
      */
-    void SendPowerOff();
+    void sendPowerOff();
 
     /**
      * @brief Send light up single symbol action (action 4)
      * @param symbol_index The symbol index to light up (0-47)
      */
-    void SendLightUpSymbol(uint8_t symbol_index);
+    void sendLightUpSymbol(uint8_t symbol_index);
 
     /**
      * @brief Send goto factory action (action 5)
      */
-    void SendGotoFactory();
+    void sendGotoFactory();
 
     /**
-     * @brief Send gate animation (alias for SendAnimation for compatibility)
+     * @brief Send gate animation (alias for sendAnimation for compatibility)
      */
-    void SendGateAnimation(SGUCommNS::EChevronAnimation animation) { SendAnimation(animation); }
+    void sendGateAnimation(SGUCommNS::EChevronAnimation animation) { sendAnimation(animation); }
 
     /**
      * @brief Task running function
      */
-    static void TaskRunning(void* arg);
+    static void taskRunning(void* arg);
 
     /**
      * @brief GAP event handler
@@ -108,23 +108,23 @@ public:
     static int gapEventHandler(struct ble_gap_event* event, void* arg);
 
 private:
-    bool LockMutex() { return (pdTRUE == xSemaphoreTake(m_mutex_handle, (TickType_t)pdMS_TO_TICKS(100))); }
-    void UnlockMutex() { xSemaphoreGive(m_mutex_handle); }
+    bool lockMutex() { return (pdTRUE == xSemaphoreTake(m_mutex_handle, (TickType_t)pdMS_TO_TICKS(100))); }
+    void unlockMutex() { xSemaphoreGive(m_mutex_handle); }
 
     /**
      * @brief Write data to the characteristic
      */
-    SGResult WriteCharacteristic(const uint8_t* data, uint16_t len);
+    SGResult writeCharacteristic(const uint8_t* data, uint16_t len);
 
     /**
      * @brief Start scanning for the ring
      */
-    void StartScan();
+    void startScan();
 
     /**
      * @brief Connect to the ring
      */
-    void ConnectToRing();
+    void connectToRing();
 
 private:
     // Task handle

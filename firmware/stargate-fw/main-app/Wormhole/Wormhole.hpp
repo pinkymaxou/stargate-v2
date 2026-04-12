@@ -12,7 +12,7 @@ class Wormhole
     {
         NormalSGU = 0,
         NormalSG1 = 1,
-        //Blackhole = 2,
+        Blackhole = 2,
         //GlitchSGU = 3,
 
         Count
@@ -50,11 +50,11 @@ class Wormhole
     public:
     Wormhole(SGHW_HAL* hal, EType wormhole_type);
 
-    void Begin();
-    void OpeningAnimation();
-    SGResult RunTicks();
-    void ClosingAnimation();
-    void End();
+    void begin();
+    void openingAnimation();
+    SGResult runTicks();
+    void closingAnimation();
+    void end();
 
     private:
     EType m_wormhole_type;
@@ -62,15 +62,16 @@ class Wormhole
 
     bool m_is_run_initialized = false;
     uint32_t m_max_brightness = 0;
+    float m_bh_phase = 0.0f;
 
     static constexpr uint32_t LEDEFFECT_COUNT = 48;
     SLedEffect m_led_effects[LEDEFFECT_COUNT];
 
     public:
-    static bool Validatwormhole_type(EType wormhole_type);
+    static bool validateWormholeType(EType wormhole_type);
     private:
-    void Illuminatring(ERing ring, Wormhole::EDir dir);
-    void ClearAll();
+    void illuminatring(ERing ring, Wormhole::EDir dir);
+    void clearAll();
 
     // One based, but I should have made it 0 based like a respectable programmer.
     // do be fair that's how it's labelled on  the board.
@@ -94,17 +95,17 @@ class Wormhole
         [(int)ERing::Ring3] = { .ring = m_ring3_one_based, .ring_count = RING3_COUNT }
     };
 
-    static ERing GetRing(int zero_based_index);
+    static ERing getRing(int zero_based_index);
 
     public:
     inline static constexpr const char* m_texts[] =
     {
         [(int)EType::NormalSGU] = "Normal SGU",
         [(int)EType::NormalSG1] = "Normal SG1",
-        //[(int)EType::Blackhole] = "Blackhole",
+        [(int)EType::Blackhole] = "Blackhole",
         //[(int)EType::GlitchSGU] = "Glitch SGU",
     };
     static_assert((int)EType::Count == sizeof(m_texts)/sizeof(m_texts[0]), "Text missmatch");
 
-    inline static const char* GetTypeText(EType type) { return m_texts[(int)type]; }
+    inline static const char* getTypeText(EType type) { return m_texts[(int)type]; }
 };

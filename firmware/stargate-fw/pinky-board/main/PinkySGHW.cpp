@@ -53,7 +53,7 @@ PinkySGHW::PinkySGHW()
 {
 }
 
-void PinkySGHW::Init()
+void PinkySGHW::init()
 {
     m_mutex_handle = xSemaphoreCreateMutexStatic( &m_mutex_buffer );
 
@@ -74,7 +74,7 @@ void PinkySGHW::Init()
     gpio_set_direction(STEPPER_DIR_PIN, GPIO_MODE_OUTPUT);
     gpio_set_direction(STEPPER_STEP_PIN, GPIO_MODE_OUTPUT);
     gpio_set_direction(STEPPER_SLP_PIN, GPIO_MODE_OUTPUT);
-    PowerDownStepper();
+    powerDownStepper();
 
     // Mp3 player
     uart_config_t uart_config =
@@ -143,7 +143,7 @@ void PinkySGHW::Init()
     ESP_ERROR_CHECK(mcpwm_timer_enable(m_servo.timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(m_servo.timer, MCPWM_TIMER_START_NO_STOP));
 
-    PowerDownServo(); // Don't piss off the servo motor
+    powerDownServo(); // Don't piss off the servo motor
 
 
     // Init ramp LED
@@ -168,7 +168,7 @@ void PinkySGHW::Init()
         .hpoint         = 0
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-    SetRampLight(0);
+    setRampLight(0);
 
     // Initialize GPIO for home sensor
     gpio_set_direction(HOMESENSOR_PIN, GPIO_MODE_INPUT);
@@ -187,15 +187,15 @@ void PinkySGHW::Init()
         .mem_block_symbols = 512,
         .flags = { .with_dma = false } // whether to enable the DMA feature
     };
-    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &m_led_strip));
     /* Set all LED off to clear all pixels */
-    led_strip_clear(led_strip);
+    led_strip_clear(m_led_strip);
 
 
     // Stepper control timer
     const esp_timer_create_args_t periodic_timer_args =
     {
-        .callback = &tmr_signal_callback,
+        .callback = &tmrSignalCallback,
         .arg = this,
         .dispatch_method = ESP_TIMER_TASK,
         .name = "stepper_timer",
@@ -205,26 +205,26 @@ void PinkySGHW::Init()
     ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &this->m_stepper.signal_timer_handle));
 }
 
-void PinkySGHW::SetChevronLight(EChevron chevron, bool state)
+void PinkySGHW::setChevronLight(EChevron chevron, bool state)
 {
     // No such things on the pinky board.
 }
 
-void PinkySGHW::SetRampLight(double perc)
+void PinkySGHW::setRampLight(double perc)
 {
-    LockMutex();
+    lockMutex();
     ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 4095 * perc));
     // Update duty to apply the new value
     ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
-    UnlockMutex();
+    unlockMutex();
 }
 
-void PinkySGHW::PowerUpStepper()
+void PinkySGHW::powerUpStepper()
 {
     gpio_set_level(STEPPER_SLP_PIN, true);
 }
 
-void PinkySGHW::StepStepperCW()
+void PinkySGHW::stepStepperCW()
 {
     gpio_set_level(STEPPER_DIR_PIN, true);
     gpio_set_level(STEPPER_STEP_PIN, true);
@@ -233,7 +233,7 @@ void PinkySGHW::StepStepperCW()
     esp_rom_delay_us(4);
 }
 
-void PinkySGHW::StepStepperCCW()
+void PinkySGHW::stepStepperCCW()
 {
     gpio_set_level(STEPPER_DIR_PIN, false);
     gpio_set_level(STEPPER_STEP_PIN, true);
@@ -242,20 +242,20 @@ void PinkySGHW::StepStepperCCW()
     esp_rom_delay_us(4);
 }
 
-void PinkySGHW::PowerDownStepper()
+void PinkySGHW::powerDownStepper()
 {
     gpio_set_level(STEPPER_SLP_PIN, false);
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void PinkySGHW::PowerUpServo()
+void PinkySGHW::powerUpServo()
 {
-    SetServo(m_last_servo_position);
+    setServo(m_last_servo_position);
 }
 
-void PinkySGHW::SetServo(double position)
+void PinkySGHW::setServo(double position)
 {
-    LockMutex();
+    lockMutex();
     // Convert position (0.0 to 1.0) to pulse width
     // Servo typically needs 1000us (1ms) to 2000us (2ms) pulse width
     // Center is at 1500us (1.5ms)
@@ -263,72 +263,79 @@ void PinkySGHW::SetServo(double position)
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(m_servo.comparator, pulse_width_us));
     m_last_servo_position = position;
     ESP_LOGI(TAG, "pulse_width_us: %lu pos: %f", pulse_width_us, (float)position);
-    UnlockMutex();
+    unlockMutex();
 }
 
-void PinkySGHW::PowerDownServo()
+void PinkySGHW::powerDownServo()
 {
-    LockMutex();
+    lockMutex();
     // Set comparator to 0 to keep output low
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(m_servo.comparator, 0));
-    UnlockMutex();
+    unlockMutex();
 }
 
 // Wormhole related
-int32_t PinkySGHW::GetWHPixelCount()
+int32_t PinkySGHW::getWHPixelCount()
 {
     return WORMHOLELEDS_LEDCOUNT;
 }
 
-void PinkySGHW::SetWHPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue)
+void PinkySGHW::setWHPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue)
 {
-    if (LockMutex())
+    if (lockMutex())
     {
-        led_strip_set_pixel(led_strip, index, red, green, blue);
-        UnlockMutex();
+        led_strip_set_pixel(m_led_strip, index, red, green, blue);
+        unlockMutex();
     }
 }
 
-void PinkySGHW::ClearAllWHPixels()
+void PinkySGHW::clearAllWHPixels()
 {
-    if (LockMutex())
+    if (lockMutex())
     {
-        led_strip_clear(led_strip);
-        UnlockMutex();
+        led_strip_clear(m_led_strip);
+        unlockMutex();
     }
 }
 
-bool PinkySGHW::RefreshWHPixels()
+bool PinkySGHW::refreshWHPixels()
 {
-    if (LockMutex())
+    if (lockMutex())
     {
-        const esp_err_t ret = led_strip_refresh(led_strip);
-        UnlockMutex();
+        esp_err_t ret = led_strip_refresh(m_led_strip);
+        if (ESP_OK != ret)
+        {
+            // RMT channel may still be transmitting the previous frame (e.g. delayed by a
+            // WiFi interrupt). Wait one WS2812 frame time and retry once before giving up.
+            vTaskDelay(pdMS_TO_TICKS(2));
+            ret = led_strip_refresh(m_led_strip);
+        }
+        unlockMutex();
         return ESP_OK == ret;
     }
     return false;
 }
 
-void PinkySGHW::SetSanityLED(bool state)
+void PinkySGHW::setSanityLED(bool state)
 {
     // The sanity LED is ground driven.
     gpio_set_level(SANITY_PIN, !state);
 }
 
-bool PinkySGHW::GetIsHomeSensorActive()
+bool PinkySGHW::getIsHomeSensorActive()
 {
     return !gpio_get_level(HOMESENSOR_PIN);
 }
 
-void PinkySGHW::SendMp3PlayerCMD(const char* cmd)
+void PinkySGHW::sendMp3PlayerCMD(const char* cmd)
 {
-    uart_write_bytes(MP3PLAYER_PORT_NUM, (const char *)cmd, strlen(cmd));
+    uart_write_bytes(MP3PLAYER_PORT_NUM, cmd, strlen(cmd));
 }
 
-bool PinkySGHW::SpinUntil(ESpinDirection spin_direction, ETransition transition, uint32_t timeout_ms, int32_t* ref_tick_count, const volatile bool* cancel_flag)
+bool PinkySGHW::spinUntil(ESpinDirection spin_direction, ETransition transition, uint32_t timeout_ms, int32_t* ref_tick_count, const volatile bool* cancel_flag)
 {
     const TickType_t start_tick = xTaskGetTickCount();
-    bool old_sensor_state = GetIsHomeSensorActive();
+    bool old_sensor_state = getIsHomeSensorActive();
 
     while ((xTaskGetTickCount() - start_tick) < pdMS_TO_TICKS(timeout_ms))
     {
@@ -338,11 +345,11 @@ bool PinkySGHW::SpinUntil(ESpinDirection spin_direction, ETransition transition,
             return false;
         }
 
-        const bool new_home_sensor_state = GetIsHomeSensorActive();
+        const bool new_home_sensor_state = getIsHomeSensorActive();
 
         if (ESpinDirection::CCW == spin_direction)
         {
-            StepStepperCCW();
+            stepStepperCCW();
             if (nullptr != ref_tick_count)
             {
                 (*ref_tick_count)++;
@@ -350,7 +357,7 @@ bool PinkySGHW::SpinUntil(ESpinDirection spin_direction, ETransition transition,
         }
         if (ESpinDirection::CW == spin_direction)
         {
-            StepStepperCW();
+            stepStepperCW();
             if (nullptr != ref_tick_count)
             {
                 (*ref_tick_count)--;
@@ -378,7 +385,7 @@ bool PinkySGHW::SpinUntil(ESpinDirection spin_direction, ETransition transition,
     return false;
 }
 
-bool PinkySGHW::MoveStepperTo(int32_t ticks, uint32_t timeout_ms)
+bool PinkySGHW::moveStepperTo(int32_t ticks, uint32_t timeout_ms)
 {
     // Setup the parameters
     this->m_stepper.task_control_handle = xTaskGetCurrentTaskHandle();
@@ -412,7 +419,7 @@ bool PinkySGHW::MoveStepperTo(int32_t ticks, uint32_t timeout_ms)
     return true;
 }
 
-IRAM_ATTR void PinkySGHW::tmr_signal_callback(void* arg)
+IRAM_ATTR void PinkySGHW::tmrSignalCallback(void* arg)
 {
     PinkySGHW* gc = (PinkySGHW*)arg;
     Stepper* step = (Stepper*)&gc->m_stepper;
@@ -458,11 +465,11 @@ IRAM_ATTR void PinkySGHW::tmr_signal_callback(void* arg)
         // Count every two
         if (step->is_ccw)
         {
-            gc->StepStepperCCW();
+            gc->stepStepperCCW();
         }
         else
         {
-            gc->StepStepperCW();
+            gc->stepStepperCW();
         }
 
         step->count++;

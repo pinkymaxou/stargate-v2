@@ -23,11 +23,11 @@ class BaseGate
     const GateGalaxy gate_galaxy;
     const char* name;
 
-    virtual const GateSymbol& GetSymbol(uint8_t symbol_num) const = 0;
-    virtual int32_t GetSymbolCount() const = 0;
+    virtual const GateSymbol& getSymbol(uint8_t symbol_num) const = 0;
+    virtual int32_t getSymbolCount() const = 0;
 
-    virtual const GateAddress& GetAddress(uint32_t index) const { return InvalidGateAddress; }
-    virtual int32_t GetAddressCount() const { return 0; }
+    virtual const GateAddress& getAddress(uint32_t index) const { return InvalidGateAddress; }
+    virtual int32_t getAddressCount() const { return 0; }
 
     static inline const GateSymbol InvalidSymbol{ };
     static inline const GateAddress InvalidGateAddress { };

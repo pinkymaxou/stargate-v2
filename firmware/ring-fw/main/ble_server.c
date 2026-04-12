@@ -30,6 +30,12 @@ static uint16_t char_value_handle;
 
 // Action callbacks
 static ble_action_callbacks_t g_action_callbacks = {0};
+static volatile bool g_is_connected = false;
+
+bool ble_server_is_connected(void)
+{
+    return g_is_connected;
+}
 
 static void ble_advertise(void);
 
@@ -51,6 +57,9 @@ static int ble_characteristic_access(uint16_t conn_handle, uint16_t attr_handle,
 
     case BLE_GATT_ACCESS_OP_WRITE_CHR:
         ESP_LOGI(TAG, "Characteristic write");
+        if (g_action_callbacks.any_write_cb) {
+            g_action_callbacks.any_write_cb();
+        }
         uint16_t om_len = OS_MBUF_PKTLEN(ctxt->om);
         if (om_len > sizeof(char_value)) {
             return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
@@ -181,10 +190,14 @@ static int ble_gap_event(struct ble_gap_event *event, void *arg)
         ESP_LOGI(TAG, "Connection %s; status=%d",
                  event->connect.status == 0 ? "established" : "failed",
                  event->connect.status);
+        if (event->connect.status == 0) {
+            g_is_connected = true;
+        }
         break;
 
     case BLE_GAP_EVENT_DISCONNECT:
         ESP_LOGI(TAG, "Disconnect; reason=%d", event->disconnect.reason);
+        g_is_connected = false;
         // Start advertising again
         ble_advertise();
         break;

@@ -2,8 +2,8 @@
 
 A fully functional Stargate replica controller based on ESP32, designed to replace Raspberry Pi-based solutions with a more cost-effective and integrated approach.
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.3.1-blue)
+[![CI](https://github.com/pinkymaxou/stargate-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/pinkymaxou/stargate-v2/actions/workflows/ci.yml)
+![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v6.1--dev-blue)
 ![License](https://img.shields.io/badge/license-See%20doc%2Fcopyright.md-lightgrey)
 
 ## Overview
@@ -61,31 +61,31 @@ This project provides a complete embedded system for controlling Stargate props 
 
 ### Prerequisites
 
-- **Hardware**: ESP32-S3 mainboard (pinky-board or compatible)
-- **Software**: ESP-IDF 5.3.1
+- **Hardware**: ESP32 mainboard (pinky-board) or ESP32-S3 (pablo-board)
+- **Software**: ESP-IDF v6.1-dev
 - **Tools**: Python 3.8+, CMake, Ninja
 
 ### Installation
 
-1. **Install ESP-IDF 5.3**:
+1. **Install ESP-IDF v6.1-dev**:
 ```bash
 mkdir -p ~/esp
 cd ~/esp
-git clone -b v5.3.1 --recursive https://github.com/espressif/esp-idf.git esp-idf-5.3
-cd esp-idf-5.3
+git clone -b v6.1-dev --recursive https://github.com/espressif/esp-idf.git esp-idf-6.1
+cd esp-idf-6.1
 ./install.sh
 ```
 
 2. **Clone Repository**:
 ```bash
-git clone https://github.com/user/stargate-mainboard-esp32.git
-cd stargate-mainboard-esp32
+git clone https://github.com/pinkymaxou/stargate-v2.git
+cd stargate-v2
 ```
 
 3. **Build and Flash**:
 ```bash
 cd firmware/stargate-fw/pinky-board
-. ~/esp/esp-idf-5.3/export.sh
+. ~/esp/esp-idf-6.1/export.sh
 idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
@@ -149,7 +149,7 @@ Comprehensive documentation is available in the [doc/](doc/) directory:
 ### Pinky Board (Production)
 
 **Specifications**:
-- MCU: ESP32-S3-WROOM-1
+- MCU: ESP32-WROOM-32
 - Flash: 16 MB
 - PSRAM: 8 MB
 - WiFi: 802.11 b/g/n
@@ -244,9 +244,10 @@ idf.py build
 ### Code Style
 
 - C++ Standard: C++17
-- Naming: PascalCase for classes, camelCase for methods
-- Indentation: 4 spaces
-- Comments: Doxygen format for APIs
+- Naming: PascalCase for classes/structs, lowerPascalCase for functions, snake_case for locals
+- Braces: Allman style (opening brace on new line)
+- Conditions: Yoda style (constant on left side)
+- No Hungarian notation type prefixes
 
 ## Why ESP32 over Raspberry Pi?
 
@@ -266,7 +267,7 @@ idf.py build
 ### Build Issues
 
 **MCPWM API errors**:
-- Ensure ESP-IDF 5.3+ is installed
+- Ensure ESP-IDF v6.1-dev is installed
 - Check compatibility notes in [doc/architecture.md](doc/architecture.md)
 
 **BLE compilation errors**:
@@ -322,7 +323,7 @@ See [doc/copyright.md](doc/copyright.md) for licensing information.
 ---
 
 **Current Version**: 1.0.0
-**ESP-IDF Version**: 5.3.1
-**Last Updated**: 2026-01-22
+**ESP-IDF Version**: v6.1-dev
+**Last Updated**: 2026-04-10
 
 For detailed documentation, visit the [doc/](doc/) directory.

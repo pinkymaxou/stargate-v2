@@ -421,6 +421,7 @@ void app_main(void)
 
     // Initialize BLE server with action callbacks
     ble_action_callbacks_t ble_callbacks = {
+        .any_write_cb = ResetAutoOffTicks,
         .heartbeat_cb = BLE_HeartbeatHandler,
         .animation_cb = BLE_AnimationHandler,
         .symbols_cb = BLE_SymbolsHandler,
@@ -458,7 +459,11 @@ void app_main(void)
 
         if (!m_bIsSuicide)
         {
-            // Kill the power after 10 minutes maximum
+            // Keep alive while a BLE client is connected
+            if (ble_server_is_connected())
+                ResetAutoOffTicks();
+
+            // Kill the power after the timeout when nothing is connected
             if ((xTaskGetTickCount() - m_lAutoOffTicks) > pdMS_TO_TICKS(m_ulAutoOffTimeoutMs))
             {
                 m_bIsSuicide = true;

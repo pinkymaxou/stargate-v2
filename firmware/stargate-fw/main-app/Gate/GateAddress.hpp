@@ -88,16 +88,16 @@ class GateAddress
     public:
     static constexpr uint32_t ADDRESSTEXT_LEN = 40;
 
-    inline const char* GetName() const { return m_name; }
-    inline uint8_t GetSymbol(uint8_t index) const
+    inline const char* getName() const { return m_name; }
+    inline uint8_t getSymbol(uint8_t index) const
     {
         if (index >= m_symbol_count)
             return 0;
         return m_symbols[index];
     }
-    inline uint32_t GetSymbolCount() const { return m_symbol_count; }
+    inline uint32_t getSymbolCount() const { return m_symbol_count; }
 
-    inline uint32_t GetAddressText(char text[ADDRESSTEXT_LEN+1])
+    inline uint32_t getAddressText(char text[ADDRESSTEXT_LEN+1])
     {
         return snprintf(text, ADDRESSTEXT_LEN, "%d %d %d\t%d %d %d\t%d %d %d",
             (int)m_symbols[0], (int)m_symbols[1], (int)m_symbols[2],

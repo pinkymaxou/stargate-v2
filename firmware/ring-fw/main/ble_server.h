@@ -59,9 +59,16 @@ typedef void (*ble_action_light_symbol_cb_t)(uint8_t symbol_index, uint8_t level
 typedef void (*ble_action_goto_factory_cb_t)(void);
 
 /**
+ * @brief Callback invoked on every BLE write, regardless of action type.
+ *        Use this to reset any inactivity timer without requiring a dedicated heartbeat message.
+ */
+typedef void (*ble_action_any_write_cb_t)(void);
+
+/**
  * @brief Structure containing all BLE action callbacks
  */
 typedef struct {
+    ble_action_any_write_cb_t any_write_cb;
     ble_action_heartbeat_cb_t heartbeat_cb;
     ble_action_animation_cb_t animation_cb;
     ble_action_symbols_cb_t symbols_cb;
@@ -85,6 +92,11 @@ int ble_server_init(const ble_action_callbacks_t *callbacks);
  * @brief Stop the BLE server
  */
 void ble_server_deinit(void);
+
+/**
+ * @brief Returns true if a BLE client is currently connected
+ */
+bool ble_server_is_connected(void);
 
 #ifdef __cplusplus
 }

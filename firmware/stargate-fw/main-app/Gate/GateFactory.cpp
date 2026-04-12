@@ -1,6 +1,6 @@
 #include "GateFactory.hpp"
 
-BaseGate& GateFactory::Get(GateGalaxy gate_galaxy)
+BaseGate& GateFactory::get(GateGalaxy gate_galaxy)
 {
     switch(gate_galaxy)
     {
@@ -14,7 +14,7 @@ BaseGate& GateFactory::Get(GateGalaxy gate_galaxy)
     }
 }
 
-UniverseGate& GateFactory::GetUniverseGate()
+UniverseGate& GateFactory::getUniverseGate()
 {
     return m_universeGate;
 }
