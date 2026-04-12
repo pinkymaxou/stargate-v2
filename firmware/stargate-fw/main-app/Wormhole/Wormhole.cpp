@@ -53,11 +53,11 @@ SGResult Wormhole::runTicks()
 
     if (EType::Blackhole == m_wormhole_type)
     {
-        static constexpr float TWO_PI = 6.2832f;
+        static constexpr float TWO_PI = 6.28318f;
 
         m_bh_phase += 0.18f;
-        if (m_bh_phase > TWO_PI)
-            m_bh_phase -= TWO_PI;
+        // No manual wrap — sinf() handles range reduction internally.
+        // float precision is sufficient for many hours of continuous operation.
 
         // Ring3 — event horizon: near-black, faint deep-violet pulse
         {
